@@ -10,7 +10,7 @@
   .card{background:#0b1220;padding:16px;border-radius:12px;margin:24px 0}
   label{display:block;margin:10px 0 6px;font-weight:600}
   input,select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;margin-bottom:8px;}
-  .row{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-bottom:20px;} /* увеличенный gap и отступ снизу */
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-bottom:20px;}
   .single-row{margin-bottom:20px;}
   button{margin-top:0;width:100%;padding:12px;border:0;border-radius:12px;background:#22c55e;color:#06230f;font-weight:700;cursor:pointer}
   button.secondary{background:#38bdf8;color:#052433}
@@ -20,9 +20,8 @@
   .error{background:#3f1212;color:#fecaca;border:1px solid #7f1d1d}
   .field-error{color:#fecaca;font-size:13px;margin-top:2px;margin-bottom:8px}
   .note{font-size:14px}
-  .qr-wrap{text-align:center;margin-top:24px;} /* увеличенный отступ сверху */
+  .qr-wrap{text-align:center;margin-top:24px;}
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -49,9 +48,21 @@
         <div class="field-error" id="err-email"></div>
       </div>
       <div>
-        <label>Phone (WhatsApp E.164)</label>
+        <label>Phone (WhatsApp)</label>
         <input name="whatsapp" placeholder="+9725XXXXXXXX"/>
         <div class="field-error" id="err-whatsapp"></div>
+        <div class="qr-wrap">
+          <a href="https://wa.me/14155238886?text=join%20south-public" target="_blank">
+            Join WhatsApp Sandbox
+          </a>
+          <br>
+          <img
+            width="220" height="220"
+            alt="Scan to join WhatsApp sandbox"
+            src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=https%3A%2F%2Fwa.me%2F14155238886%3Ftext%3Djoin%2520south-public"
+          />
+          <div class="muted">Scan to join WhatsApp sandbox</div>
+        </div>
       </div>
     </div>
     <div class="single-row">
@@ -65,15 +76,6 @@
   </form>
 
   <div class="card">
-    <h3>WhatsApp Bot QR-code</h3>
-    <p class="note">Scan QR to join the WhatsApp bot and receive alerts.</p>
-    <div class="qr-wrap">
-      <canvas id="qr"></canvas>
-      <div class="muted">Scan QR with WhatsApp</div>
-    </div>
-  </div>
-
-  <div class="card">
     <h3>Demo: Add 10 more purchases</h3>
     <p class="note">We’ll simulate 10 orders (≈3 mismatches). You should get alerts in your chosen channel.</p>
     <button id="gen10" class="secondary" disabled>Add 10 more purchases</button>
@@ -83,7 +85,6 @@
 <script>
   const REGISTER_URL = "https://dmitreyvladimirovic.app.n8n.cloud/webhook/rg/register";
   const SIMULATE_URL = "https://dmitreyvladimirovic.app.n8n.cloud/webhook/rg/simulate";
-  const WHATSAPP_BOT_URL = "https://wa.me/1234567890?text=join"; // <-- замените на ваш актуальный URL
 
   const ok = document.getElementById('ok'), err = document.getElementById('err'), gen10=document.getElementById('gen10');
 
@@ -95,28 +96,16 @@
 
   function validateFields(data) {
     let errors = {};
-    if (!data.company || data.company.trim().length<2)
-      errors.company = "Введите название компании.";
-    if (!data.name || data.name.trim().length<2)
-      errors.name = "Введите имя контакта.";
+    if (!data.company || data.company.trim().length < 2)
+      errors.company = "Enter company/store name.";
+    if (!data.name || data.name.trim().length < 2)
+      errors.name = "Enter contact person name.";
     if (!data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email))
-      errors.email = "Введите корректный email.";
+      errors.email = "Enter a valid email address.";
     if (data.whatsapp && !/^\+\d{8,15}$/.test(data.whatsapp))
-      errors.whatsapp = "Введите телефон в формате +9725XXXXXXXX.";
+      errors.whatsapp = "Enter phone in format +9725XXXXXXXX.";
     return errors;
   }
-
-  function updateQR() {
-    // QR для WhatsApp бота
-    new QRious({
-      element: document.getElementById('qr'),
-      value: WHATSAPP_BOT_URL,
-      size: 120,
-      background: '#fff',
-      foreground: '#0f172a'
-    });
-  }
-  updateQR();
 
   document.getElementById('regForm').onsubmit = async (e) => {
     e.preventDefault(); ok.style.display='none'; err.style.display='none'; gen10.disabled=true;
@@ -128,7 +117,7 @@
         document.getElementById('err-'+field).textContent = msg;
       });
       err.style.display='block';
-      err.textContent = "❌ Исправьте отмеченные поля.";
+      err.textContent = "❌ Please correct highlighted fields.";
       return;
     }
     try{
@@ -136,24 +125,25 @@
       const j = await r.json();
       if(r.ok && j.ok){
         ok.style.display='block';
+        ok.textContent = "✅ Registered! Now you can generate demo orders below.";
         err.style.display='none';
         gen10.disabled=false;
-        gen10.dataset.company=j.company||data.company;
+        gen10.dataset.company = j.company || data.company;
       } else {
         if (j.errors && typeof j.errors === "object") {
           Object.entries(j.errors).forEach(([field, msg]) => {
             if (document.getElementById('err-'+field)) document.getElementById('err-'+field).textContent = msg;
           });
           err.style.display='block';
-          err.textContent = "❌ Исправьте отмеченные поля.";
+          err.textContent = "❌ Please correct highlighted fields.";
         } else {
           err.style.display='block';
-          err.textContent = "❌ Ошибка — проверьте поля или попробуйте еще раз.";
+          err.textContent = "❌ Error — check fields or try again.";
         }
       }
     }catch{
       err.style.display='block';
-      err.textContent = "❌ Ошибка сети — попробуйте еще раз.";
+      err.textContent = "❌ Network error — please try again.";
     }
   };
 
@@ -162,7 +152,7 @@
     gen10.disabled=true;
     try{
       const r = await fetch(SIMULATE_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({company,count:10,mismatch_ratio:0.3})});
-      alert(r.ok?'Triggered 10 demo orders!':'Failed to trigger orders.');
+      alert(r.ok ? 'Triggered 10 demo orders!' : 'Failed to trigger orders.');
     }catch{ alert('Network error'); }
     gen10.disabled=false;
   };
