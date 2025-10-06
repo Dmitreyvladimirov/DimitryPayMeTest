@@ -20,7 +20,7 @@
   .error{background:#3f1212;color:#fecaca;border:1px solid #7f1d1d}
   .field-error{color:#fecaca;font-size:13px;margin-top:2px;margin-bottom:8px}
   .note{font-size:14px}
-  .qr-wrap{text-align:center;margin-top:24px;}
+  .qr-centered{text-align:center;margin-top:24px;}
 </style>
 </head>
 <body>
@@ -51,18 +51,6 @@
         <label>Phone (WhatsApp)</label>
         <input name="whatsapp" placeholder="+9725XXXXXXXX"/>
         <div class="field-error" id="err-whatsapp"></div>
-        <div class="qr-wrap">
-          <a href="https://wa.me/14155238886?text=join%20south-public" target="_blank">
-            Join WhatsApp Sandbox
-          </a>
-          <br>
-          <img
-            width="220" height="220"
-            alt="Scan to join WhatsApp sandbox"
-            src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=https%3A%2F%2Fwa.me%2F14155238886%3Ftext%3Djoin%20south-public"
-          />
-          <div class="muted">Scan to join WhatsApp sandbox</div>
-        </div>
       </div>
     </div>
     <div class="single-row">
@@ -73,6 +61,21 @@
     <button type="submit">Register</button>
     <div id="ok" class="success">✅ Registered! Now you can generate demo orders below.</div>
     <div id="err" class="error">❌ Error — check fields or try again.</div>
+
+    <!-- QR code block is here after the button and centered -->
+    <div class="qr-centered">
+      <a href="https://wa.me/14155238886?text=join%20south-public" target="_blank">
+        Join WhatsApp Sandbox
+      </a>
+      <br>
+      <img
+        width="220" height="220"
+        alt="Scan to join WhatsApp sandbox"
+        src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=https%3A%2F%2Fwa.me%2F14155238886%3Ftext%3Djoin%20south-public"
+      />
+      <div class="muted">Scan to join WhatsApp sandbox</div>
+    </div>
+    <!-- end QR block -->
   </form>
 
   <div class="card">
