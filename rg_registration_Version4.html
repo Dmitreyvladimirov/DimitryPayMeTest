@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Reconciliation Guardian — Registration</title>
+<style>
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;padding:0;background:#0f172a;color:#e2e8f0}
+  .wrap{max-width:720px;margin:40px auto;padding:24px;background:#111827;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+  h1{margin:0 0 10px;font-size:24px} p{opacity:.9}
+  .card{background:#0b1220;padding:16px;border-radius:12px;margin:16px 0}
+  label{display:block;margin:10px 0 6px;font-weight:600}
+  input,select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e2e8f0}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  button{margin-top:16px;width:100%;padding:12px;border:0;border-radius:12px;background:#22c55e;color:#06230f;font-weight:700;cursor:pointer}
+  button.secondary{background:#38bdf8;color:#052433}
+  .muted{font-size:13px;opacity:.8}.success,.error{display:none;padding:10px 12px;border-radius:8px;margin-top:12px}
+  .success{background:#052e1b;color:#bbf7d0;border:1px solid #14532d}
+  .error{background:#3f1212;color:#fecaca;border:1px solid #7f1d1d}
+  .note{font-size:14px}.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .qr-wrap{text-align:center;margin-top:12px;}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <h1>Reconciliation Guardian — Register</h1>
+  <p class="muted">Fill the form, opt-in to WhatsApp sandbox (if selected), then press “Add 10 more purchases” to see live alerts.</p>
+
+  <form id="regForm" class="card">
+    <div class="row">
+      <div><label>Company / Store name</label><input name="company" required placeholder="Tel Aviv Crafts"/></div>
+      <div><label>Contact person</label><input name="name" required placeholder="Your name"/></div>
+    </div>
+    <div class="row">
+      <div><label>Email</label><input name="email" type="email" required placeholder="you@company.com"/></div>
+      <div><label>Phone (WhatsApp E.164)</label><input name="whatsapp" placeholder="+9725XXXXXXXX"/></div>
+    </div>
+    <div class="row">
+      <div>
+        <label>Preferred channel</label>
+        <select name="channel"><option value="whatsapp">WhatsApp</option><option value="email">Email</option><option value="telegram">Telegram</option></select>
+      </div>
+      <div><label>Telegram @username or chat_id (optional)</label><input name="telegram" placeholder="@username or chat_id"/></div>
+    </div>
+
+    <div class="card">
+      <label>WhatsApp Opt-in (Twilio Sandbox)</label>
+      <p class="note">Ask users to <b>send a message</b> to your sandbox number first:</p>
+      <div class="grid-3">
+        <input id="waNumber" placeholder="+1 415 523 8886"/>
+        <input id="waJoinCode" placeholder="join YOURCODE"/>
+        <button type="button" class="secondary" id="openWa">Open WhatsApp link</button>
+      </div>
+      <p class="muted">It will open: https://wa.me/&lt;number&gt;?text=&lt;join-code&gt;</p>
+      <div class="qr-wrap">
+        <canvas id="qr"></canvas>
+        <div class="muted">Scan QR to join WhatsApp sandbox</div>
+      </div>
+    </div>
+
+    <button type="submit">Register</button>
+    <div id="ok" class="success">✅ Registered! Now you can generate demo orders below.</div>
+    <div id="err" class="error">❌ Error — check fields or try again.</div>
+  </form>
+
+  <div class="card">
+    <h3>Demo: Add 10 more purchases</h3>
+    <p class="note">We’ll simulate 10 orders (≈3 mismatches). You should get alerts in your chosen channel.</p>
+    <button id="gen10" class="secondary" disabled>Add 10 more purchases</button>
+  </div>
+</div>
+
+<script>
+  const REGISTER_URL = "https://YOUR_N8N_DOMAIN/webhook/rg/register";
+  const SIMULATE_URL = "https://YOUR_N8N_DOMAIN/webhook/rg/simulate";
+
+  const ok = document.getElementById('ok'), err = document.getElementById('err'), gen10=document.getElementById('gen10');
+
+  document.getElementById('openWa').onclick = () => {
+    const num = document.getElementById('waNumber').value.replace(/\s+/g,'');
+    const code = encodeURIComponent(document.getElementById('waJoinCode').value.trim());
+    if (!num || !code) return alert('Fill WhatsApp number and join code');
+    window.open(`https://wa.me/${encodeURIComponent(num)}?text=${code}`, '_blank');
+  };
+
+  function updateQR() {
+    const num = document.getElementById('waNumber').value.replace(/\s+/g,'');
+    const code = encodeURIComponent(document.getElementById('waJoinCode').value.trim());
+    const url = num && code ? `https://wa.me/${encodeURIComponent(num)}?text=${code}` : '';
+    const qr = new QRious({element:document.getElementById('qr'), value:url, size:120, background:'#fff', foreground:'#0f172a'});
+  }
+  document.getElementById('waNumber').addEventListener('input', updateQR);
+  document.getElementById('waJoinCode').addEventListener('input', updateQR);
+  updateQR();
+
+  document.getElementById('regForm').onsubmit = async (e) => {
+    e.preventDefault(); ok.style.display='none'; err.style.display='none'; gen10.disabled=true;
+    const data = Object.fromEntries(new FormData(e.target).entries());
+    try{
+      const r = await fetch(REGISTER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+      const j = await r.json();
+      if(r.ok && j.ok){ ok.style.display='block'; gen10.disabled=false; gen10.dataset.company=j.company||data.company; }
+      else err.style.display='block';
+    }catch{ err.style.display='block'; }
+  };
+
+  gen10.onclick = async () => {
+    const company = gen10.dataset.company; if(!company) return alert('Register first');
+    gen10.disabled=true;
+    try{
+      const r = await fetch(SIMULATE_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({company,count:10,mismatch_ratio:0.3})});
+      alert(r.ok?'Triggered 10 demo orders!':'Failed to trigger orders.');
+    }catch{ alert('Network error'); }
+    gen10.disabled=false;
+  };
+</script>
+</body>
+</html>
