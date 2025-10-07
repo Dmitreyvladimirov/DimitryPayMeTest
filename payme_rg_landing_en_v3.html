@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PayMe × Reconciliation Guardian — Demo</title>
-  <meta name="description" content="Reconciliation Guardian demo for PayMe: registration and WhatsApp-driven order simulation.">
+  <meta name="description" content="Reconciliation Guardian demo for PayMe: registration and WhatsApp-triggered order simulation.">
   <style>
     :root{--bg:#0b1220;--card:#111827;--muted:#9aa3b2;--text:#e5e7eb;--primary:#2563eb;--accent:#22c55e;--danger:#ef4444;--border:#1f2937;--ring:rgba(37,99,235,.4);--shadow:0 10px 25px rgba(0,0,0,.35)}
     *{box-sizing:border-box} html,body{height:100%}
@@ -49,11 +49,11 @@
     <section class="hero">
       <div>
         <h1>Real-time payment mismatch protection</h1>
-        <p class="lead">Register → join WhatsApp → <b>send “orders” in WhatsApp</b> → get instant mismatch alerts.</p>
+        <p class="lead">Register → join WhatsApp → in the chat send <b>orders</b> to generate demo orders for <i>your</i> company. Mismatches trigger instant alerts.</p>
         <div class="steps">
           <div class="step">1. Register</div>
           <div class="step">2. Join WhatsApp</div>
-          <div class="step">3. Send “orders”</div>
+          <div class="step">3. Send “orders” in WhatsApp</div>
           <div class="step">4. Receive alerts</div>
         </div>
       </div>
@@ -72,4 +72,10 @@
           <div><label>Company</label><input name="company" placeholder="Demo Co"><div id="err-company" class="field-error"></div></div>
           <div><label>Name</label><input name="name" placeholder="Alex"><div id="err-name" class="field-error"></div></div>
           <div><label>Email</label><input name="email" type="email" placeholder="ops@example.com"><div id="err-email" class="field-error"></div></div>
-          <div><label>WhatsApp</
+          <div>
+            <label>WhatsApp</label>
+            <input name="whatsapp" placeholder="+9725XXXXXXXX or 05XXXXXXXXX" id="wa">
+            <div class="hint">You can enter +9725… or 05… — we will convert to +972 automatically.</div>
+            <div id="err-whatsapp" class="field-error"></div>
+          </div>
+          <div><label>Telegram ID <span class="muted">(option
