@@ -189,17 +189,16 @@
   </main>
 
   <script>
-  // Your n8n domain (Cloud)
-  const N8N = "https://dmitreyvladimirovic.app.n8n.cloud"; // no trailing slash
+  // === Config ===
+  const N8N = "https://dmitreyvladimirovic.app.n8n.cloud"; // your n8n Cloud domain (no trailing slash)
+  const ORIGIN_HINT = "Make sure Respond to Webhook in n8n returns header: Access-Control-Allow-Origin: https://dmitreyvladimirov.github.io";
 
   // WhatsApp join QR/link (Twilio Sandbox)
   const WA_JOIN_LINK = "https://wa.me/14155238886?text=join%20south-public";
-  const elQr = document.getElementById('qr');
-  const elLink = document.getElementById('waLink');
-  elLink.href = WA_JOIN_LINK;
-  elQr.src = "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=" + encodeURIComponent(WA_JOIN_LINK);
+  document.getElementById('waLink').href = WA_JOIN_LINK;
+  document.getElementById('qr').src = "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=" + encodeURIComponent(WA_JOIN_LINK);
 
-  // --- Helpers: UI errors ---
+  // --- Helpers: validation & errors ---
   function setFieldError(name, msg){ const el = document.getElementById('err-' + name); if (el) el.textContent = msg || ''; }
   function clearErrors(){ ['company','name','email','whatsapp','telegram','channel'].forEach(n => setFieldError(n, '')); }
 
@@ -207,44 +206,7 @@
   function validateWhatsApp(v){ return !!(v && v.trim().length >= 6); }
   function validateTelegram(v){ if (!v) return true; return v.startsWith('@'); }
 
-  // --- Robust sender: tries /webhook then /webhook-test; falls back to opaque no-cors if needed ---
-  async function postSmart(path, payload){
-    const endpoints = [`${N8N}/webhook${path}`, `${N8N}/webhook-test${path}`];
-
-    for (const url of endpoints){
-      // 1) Normal CORS JSON
-      try{
-        const res = await fetch(url, {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify(payload),
-          mode:'cors',
-          credentials:'omit',
-        });
-        // If CORS is not allowed, fetch throws before here. If we get here, we can read status.
-        if (res.ok) {
-          const j = await res.json().catch(()=>({}));
-          return {ok:true, url, mode:'cors', data:j};
-        }
-        // Non-2xx → try next endpoint
-      }catch(e){
-        // 2) Fallback: opaque fire-and-forget (no-cors)
-        try{
-          await fetch(url, {
-            method:'POST',
-            mode:'no-cors',
-            body: JSON.stringify(payload) // server may see raw body; configure webhook to parse raw if needed
-          });
-          return {ok:true, url, mode:'no-cors', data:null};
-        }catch(e2){
-          // continue loop → next endpoint
-        }
-      }
-    }
-    throw new Error('All endpoints failed');
-  }
-
-  // --- Registration submit ---
+  // --- Registration submit (simple request: x-www-form-urlencoded to avoid preflight) ---
   const regForm = document.getElementById('regForm');
   const regMsg = document.getElementById('regMsg');
   const btnRegister = document.getElementById('btnRegister');
@@ -257,67 +219,72 @@
     let ok = true;
     const data = Object.fromEntries(new FormData(regForm).entries());
 
-    if (!data.company || !data.company.trim()) { setFieldError('company','Company is required.'); ok = false; }
-    if (!data.name || !data.name.trim()) { setFieldError('name','Name is required.'); ok = false; }
-    if (!validateEmail(data.email)) { setFieldError('email','Invalid email.'); ok = false; }
-    if (!validateWhatsApp(data.whatsapp)) { setFieldError('whatsapp','WhatsApp number is required.'); ok = false; }
-    if (!validateTelegram(data.telegram)) { setFieldError('telegram','Telegram ID should start with @.'); ok = false; }
-
-    if (!ok) {
-      regMsg.textContent = 'Please fix the highlighted errors.';
-      regMsg.className = 'status err';
-      return;
-    }
+    if (!data.company?.trim()) { setFieldError('company','Company is required.'); ok = false; }
+    if (!data.name?.trim())    { setFieldError('name','Name is required.'); ok = false; }
+    if (!validateEmail(data.email))        { setFieldError('email','Invalid email.'); ok = false; }
+    if (!validateWhatsApp(data.whatsapp))  { setFieldError('whatsapp','WhatsApp number is required.'); ok = false; }
+    if (!validateTelegram(data.telegram))  { setFieldError('telegram','Telegram ID should start with @.'); ok = false; }
+    if (!ok) { regMsg.textContent = 'Please fix the highlighted errors.'; regMsg.className = 'status err'; return; }
 
     btnRegister.disabled = true;
     btnText.innerHTML = '<span class="spinner"></span>Registering…';
-    regMsg.className = 'status';
-    regMsg.textContent = '';
+    regMsg.className = 'status'; regMsg.textContent = '';
 
-    try{
-      const r = await postSmart('/rg/register', data);
-      regMsg.textContent = (r.mode === 'no-cors')
-        ? '✅ Sent (awaiting server). If nothing happens, activate the workflow or enable CORS in n8n.'
-        : '✅ Registered';
-      regMsg.className = 'status ok';
-    }catch(err){
-      regMsg.textContent = 'Network error: ' + err.message;
+    try {
+      const body = new URLSearchParams(data).toString();
+      const res = await fetch(`${N8N}/webhook/rg/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body
+      });
+      let j = {}; try { j = await res.json(); } catch {}
+      if (res.ok) {
+        regMsg.textContent = '✅ Registered';
+        regMsg.className = 'status ok';
+      } else {
+        regMsg.textContent = 'Registration error: ' + (j.error || res.status);
+        regMsg.className = 'status err';
+      }
+    } catch (err) {
+      regMsg.textContent = 'Network error: ' + err + ' — ' + ORIGIN_HINT;
       regMsg.className = 'status err';
-    }finally{
+    } finally {
       btnRegister.disabled = false;
       btnText.textContent = 'Register';
     }
   });
 
-  // --- Create 10 orders ---
+  // --- Create 10 orders (simple request: x-www-form-urlencoded) ---
   const btn10 = document.getElementById('btn10');
   const simMsg = document.getElementById('simMsg');
 
   btn10.addEventListener('click', async ()=>{
-    simMsg.textContent = 'Creating...';
-    simMsg.className = 'status';
+    simMsg.textContent = 'Creating...'; simMsg.className = 'status';
     const company = regForm.company.value || 'Demo Co';
     btn10.disabled = true;
 
     try{
-      const r = await postSmart('/rg/simulate', { company, count: 10 });
-      simMsg.textContent = (r.mode === 'no-cors')
-        ? `✅ Sent for ${company}. If alerts don’t arrive, activate the workflow or enable CORS in n8n.`
-        : `✅ Created 10 orders for ${company}. Check your alerts.`;
-      simMsg.className = 'status ok';
+      const body = new URLSearchParams({ company, count: '10' }).toString();
+      const res = await fetch(`${N8N}/webhook/rg/simulate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body
+      });
+      let j = {}; try { j = await res.json(); } catch {}
+      if (res.ok){
+        simMsg.textContent = `✅ Created ${j.generated || 10} orders for ${j.company || company}. Check your alerts.`;
+        simMsg.className = 'status ok';
+      } else {
+        simMsg.textContent = 'Simulation error: ' + (j.error || res.status);
+        simMsg.className = 'status err';
+      }
     }catch(err){
-      simMsg.textContent = 'Network error: ' + err.message;
+      simMsg.textContent = 'Network error: ' + err + ' — ' + ORIGIN_HINT;
       simMsg.className = 'status err';
     }finally{
       btn10.disabled = false;
     }
   });
-
-  // Prepare WhatsApp join QR
-  (function(){
-    const img = document.getElementById('qr');
-    img.src = "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=" + encodeURIComponent(WA_JOIN_LINK);
-  })();
   </script>
 </body>
 </html>
