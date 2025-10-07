@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -7,40 +6,90 @@
   <title>PayMe × Reconciliation Guardian — Demo</title>
   <meta name="description" content="Reconciliation Guardian demo for PayMe: registration, WhatsApp connection, and order simulation.">
   <style>
-    :root{--bg:#0b1220;--card:#111827;--muted:#9aa3b2;--text:#e5e7eb;--primary:#2563eb;--accent:#22c55e;--danger:#ef4444;--border:#1f2937;--ring:rgba(37,99,235,.4);--shadow:0 10px 25px rgba(0,0,0,.35);}
-    *{box-sizing:border-box} html,body{height:100%}
-    body{margin:0;background:radial-gradient(1200px 800px at 80% -10%, rgba(37,99,235,.25), transparent 60%),radial-gradient(900px 600px at -10% 20%, rgba(34,197,94,.18), transparent 60%),var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Helvetica Neue",Arial,"Noto Sans";-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+    :root{
+      --bg:#0b1220; --card:#111827; --muted:#9aa3b2; --text:#e5e7eb;
+      --primary:#2563eb; --accent:#22c55e; --danger:#ef4444; --border:#1f2937; --ring:rgba(37,99,235,.4);
+      --shadow: 0 10px 25px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background: radial-gradient(1200px 800px at 80% -10%, rgba(37,99,235,.25), transparent 60%),
+                  radial-gradient(900px 600px at -10% 20%, rgba(34,197,94,.18), transparent 60%), var(--bg);
+      color:var(--text);
+      font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans";
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+    }
     .container{max-width:1080px;margin:0 auto;padding:24px}
-    header{display:flex;align-items:center;justify-content:space-between;gap:16px;position:sticky;top:0;background:linear-gradient(180deg, rgba(11,18,32,.95), rgba(11,18,32,.75));backdrop-filter:blur(6px);border-bottom:1px solid var(--border);z-index:10}
-    .brand{display:flex;align-items:center;gap:12px;padding:10px 0} .brand img{display:block;height:32px;width:auto;border-radius:6px}
+    header{
+      display:flex;align-items:center;justify-content:space-between;gap:16px;position:sticky;top:0;
+      background:linear-gradient(180deg, rgba(11,18,32,.95), rgba(11,18,32,.75)); backdrop-filter: blur(6px);
+      border-bottom:1px solid var(--border); z-index:10;
+    }
+    .brand{display:flex;align-items:center;gap:12px;padding:10px 0}
+    /* simple PayMe wordmark (inline SVG) */
+    .brand svg{display:block}
     .badge{font-size:12px;color:#cbd5e1;background:#0b1328;border:1px solid #1e2a44;padding:4px 8px;border-radius:999px}
     .pill{display:inline-block;padding:6px 10px;border-radius:999px;border:1px solid #233252;background:#0b1326;color:#cbd5e1;font-size:12px}
-    .hero{display:grid;grid-template-columns:1.2fr 1fr;gap:28px;align-items:center;margin:28px 0 18px} @media (max-width:900px){.hero{grid-template-columns:1fr}}
-    h1{font-size:36px;line-height:1.15;margin:8px 0 12px} p.lead{color:#c9d3e4;font-size:18px;margin:0 0 16px}
-    .card{background:linear-gradient(180deg,#0f172a,#0b1326);border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:var(--shadow)}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px} @media (max-width:800px){.grid{grid-template-columns:1fr}}
+    .hero{display:grid;grid-template-columns:1.2fr 1fr;gap:28px;align-items:center;margin:28px 0 18px}
+    @media (max-width: 900px){ .hero{grid-template-columns:1fr} }
+    h1{font-size:36px;line-height:1.15;margin:8px 0 12px}
+    p.lead{color:#c9d3e4;font-size:18px;margin:0 0 16px}
+    .card{
+      background:linear-gradient(180deg, #0f172a, #0b1326);
+      border:1px solid var(--border);
+      border-radius:16px;padding:18px;box-shadow:var(--shadow);
+    }
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    @media (max-width: 800px){ .grid{grid-template-columns:1fr} }
     label{display:block;margin:8px 0 6px;font-weight:600;color:#cfe0ff}
-    input,select,button{width:100%;padding:12px 14px;border-radius:12px;border:1px solid #22314f;background:#0b1220;color:var(--text);outline:0;transition:.2s ease;box-shadow:0 0 0 0 var(--ring)}
+    input,select,button{
+      width:100%;padding:12px 14px;border-radius:12px;border:1px solid #22314f;background:#0b1220;color:var(--text);
+      outline:0;transition:.2s ease;box-shadow:0 0 0 0 var(--ring);
+    }
     input:focus,select:focus{box-shadow:0 0 0 6px var(--ring);border-color:var(--primary)}
-    .btn{background:linear-gradient(180deg,var(--primary),#1d4ed8);border-color:#1e40af;font-weight:700;letter-spacing:.2px}
-    .btn:hover{filter:brightness(1.06);transform:translateY(-1px)} .btn.success{background:linear-gradient(180deg,#16a34a,#15803d);border-color:#14532d} .btn.secondary{background:#0b1326;border-color:#22314f}
-    .row{display:flex;gap:12px;flex-wrap:wrap} .row>div{flex:1 1 260px} .center{display:flex;justify-content:center;align-items:center;gap:12px}
-    .muted{color:var(--muted);font-size:13px} .status{margin-top:10px;min-height:22px} .ok{color:var(--accent)} .err{color:var(--danger)}
+    .btn{background:linear-gradient(180deg, var(--primary), #1d4ed8);border-color:#1e40af;font-weight:700;letter-spacing:.2px}
+    .btn:hover{filter:brightness(1.06);transform:translateY(-1px)}
+    .btn.success{background:linear-gradient(180deg, #16a34a, #15803d);border-color:#14532d}
+    .btn.secondary{background:#0b1326;border-color:#22314f}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    .row > div{flex:1 1 260px}
+    .muted{color:var(--muted);font-size:13px}
+    .status{margin-top:10px;min-height:22px}
+    .ok{color:var(--accent)}
+    .err{color:var(--danger)}
     .divider{height:1px;background:linear-gradient(90deg,transparent,#1f2b47,transparent);margin:18px 0}
-    .steps{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0} .step{padding:8px 12px;border:1px solid #22314f;border-radius:999px;background:#0b1326;font-size:13px}
+    .steps{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
+    .step{padding:8px 12px;border:1px solid #22314f;border-radius:999px;background:#0b1326;font-size:13px}
     footer{margin:20px 0 40px;color:#94a3b8;font-size:13px;text-align:center}
-    .qrwrap{display:flex;align-items:center;gap:16px} .qrwrap img{border-radius:12px;border:1px solid #22314f}
-    .feature{display:flex;align-items:center;gap:10px} .feature .dot{width:10px;height:10px;border-radius:50%;background:var(--primary)}
+    .qrwrap{display:flex;align-items:center;gap:16px}
+    .qrwrap img{border-radius:12px;border:1px solid #22314f}
+    .feature{display:flex;align-items:center;gap:10px}
+    .feature .dot{width:10px;height:10px;border-radius:50%;background:var(--primary)}
     .code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;background:#0b1220;border:1px solid #233252;border-radius:10px;padding:8px 10px;color:#cbd5e1}
-    .mini{font-size:12px} .field-error{color:var(--danger);font-size:12px;margin-top:6px;min-height:14px} .hint{color:#aab4c4;font-size:12px;margin-top:6px}
-    .btn[disabled]{opacity:.7;cursor:not-allowed} .spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite;display:inline-block;vertical-align:-2px;margin-right:8px}
+    .mini{font-size:12px}
+    .center{display:flex;justify-content:center;align-items:center;gap:12px}
+    .field-error{color:var(--danger);font-size:12px;margin-top:6px;min-height:14px}
+    .hint{color:#aab4c4;font-size:12px;margin-top:6px}
+    .btn[disabled]{opacity:.7;cursor:not-allowed}
+    .spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite;display:inline-block;vertical-align:-2px;margin-right:8px}
     @keyframes spin{to{transform:rotate(360deg)}}
   </style>
 </head>
 <body>
   <header class="container">
     <div class="brand">
-      <img src="data:image/jpeg;base64,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" alt="PayMe logo" />
+      <!-- PayMe styled wordmark (replace with official logo file if desired) -->
+      <svg width="132" height="28" viewBox="0 0 132 28" xmlns="http://www.w3.org/2000/svg" aria-label="PayMe">
+        <defs>
+          <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#60a5fa"/><stop offset="1" stop-color="#2563eb"/>
+          </linearGradient>
+        </defs>
+        <rect width="132" height="28" rx="8" fill="url(#g)" opacity="0.15"/>
+        <text x="12" y="20" fill="#cfe0ff" font-family="system-ui,Segoe UI,Arial" font-size="16" font-weight="700">PayMe</text>
+      </svg>
       <span class="badge">Reconciliation Guardian · Demo</span>
     </div>
     <div class="pill">n8n & Airtable · WhatsApp / Email / Telegram</div>
@@ -50,7 +99,7 @@
     <section class="hero">
       <div>
         <h1>Real-time payment mismatch protection</h1>
-        <p class="lead">This demo shows how PayMe evolves from a “passive” gateway to an <b>active financial guardian</b>. Register → connect WhatsApp → simulate 10 orders → get instant mismatch alerts.</p>
+        <p class="lead">This demo shows how PayMe evolves from a “passive” gateway to an <b>active financial guardian</b>. Register → connect WhatsApp → create 10 orders → get instant mismatch alerts.</p>
         <div class="steps">
           <div class="step">1. Register</div>
           <div class="step">2. Join WhatsApp</div>
@@ -123,10 +172,6 @@
         <div>
           <a id="waLink" class="btn secondary" style="display:inline-block;width:auto" target="_blank" rel="noopener">Open WhatsApp with join code</a>
           <div class="muted mini" style="margin-top:10px">Once connected, this number will receive alerts.</div>
-          <div class="divider"></div>
-          <div class="mini">Twilio credentials (demo):</div>
-          <div class="code mini">Account SID: ACa45687f525e5a56ee878a16678c0e8b2</div>
-          <div class="code mini">Auth Token: 0657b05bf8b39061b5e78e0773615d24</div>
         </div>
       </div>
     </section>
@@ -134,22 +179,10 @@
     <section class="card">
       <h2 style="margin:0 0 8px">3) Order simulation</h2>
       <p class="muted mini">We will create 10 orders for your company. Any mismatch between the platform and PayMe statuses will trigger an instant alert to your selected channel.</p>
-      <div class="row">
-        <div style="max-width:240px">
-          <label class="muted mini">Mismatch ratio</label>
-          <select id="ratio">
-            <option value="0.3" selected>30% (recommended)</option>
-            <option value="0.5">50%</option>
-            <option value="0.1">10%</option>
-          </select>
-        </div>
-      </div>
       <div class="row" style="margin-top:12px">
         <div><button class="btn success" id="btn10" type="button">Create 10 orders</button></div>
         <div class="status" id="simMsg"></div>
       </div>
-      <div class="divider"></div>
-      <p class="muted mini">Webhooks: <span class="code" id="w1">/webhook/rg/register</span> · <span class="code" id="w2">/webhook/rg/simulate</span> · <span class="code" id="w3">/webhook/rg/event</span></p>
     </section>
 
     <footer>
@@ -158,27 +191,29 @@
   </main>
 
   <script>
-  const N8N = "https://YOUR_N8N_DOMAIN"; // n8n domain (no trailing slash)
-  const WA_JOIN_LINK = "https://wa.me/14155238886?text=join%20south-public"; // fixed join link for QR
+  // Configuration (your n8n domain)
+  const N8N = "https://dmitreyvladimirovic.app.n8n.cloud"; // no trailing slash
 
-  // WhatsApp join QR
+  // WhatsApp join QR/link (Twilio Sandbox)
+  const WA_JOIN_LINK = "https://wa.me/14155238886?text=join%20south-public";
   const elQr = document.getElementById('qr');
   const elLink = document.getElementById('waLink');
   elLink.href = WA_JOIN_LINK;
   elQr.src = "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=" + encodeURIComponent(WA_JOIN_LINK);
 
   // Field error helpers
-  function setFieldError(name, msg) { const el = document.getElementById('err-' + name); if (el) el.textContent = msg || ''; }
-  function clearErrors() { ['company','name','email','whatsapp','telegram','channel'].forEach(n => setFieldError(n, '')); }
-  function validateEmail(v) { if (!v) return true; return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
-  function validateWhatsApp(v) { return !!(v && v.trim().length >= 6); }
-  function validateTelegram(v) { if (!v) return true; return v.startsWith('@'); }
+  function setFieldError(name, msg){ const el = document.getElementById('err-' + name); if (el) el.textContent = msg || ''; }
+  function clearErrors(){ ['company','name','email','whatsapp','telegram','channel'].forEach(n => setFieldError(n, '')); }
+  function validateEmail(v){ if (!v) return true; return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(v); }
+  function validateWhatsApp(v){ return !!(v && v.trim().length >= 6); }
+  function validateTelegram(v){ if (!v) return true; return v.startsWith('@'); }
 
   const regForm = document.getElementById('regForm');
   const regMsg = document.getElementById('regMsg');
   const btnRegister = document.getElementById('btnRegister');
   const btnText = btnRegister.querySelector('.btn-text');
 
+  // Registration submit
   regForm.addEventListener('submit', async (e)=>{
     e.preventDefault();
     clearErrors();
@@ -192,44 +227,69 @@
     if (!validateWhatsApp(data.whatsapp)) { setFieldError('whatsapp','WhatsApp number is required.'); ok = false; }
     if (!validateTelegram(data.telegram)) { setFieldError('telegram','Telegram ID should start with @.'); ok = false; }
 
-    if (!ok) { regMsg.textContent = 'Please fix the highlighted errors.'; regMsg.className = 'status err'; return; }
+    if (!ok) {
+      regMsg.textContent = 'Please fix the highlighted errors.';
+      regMsg.className = 'status err';
+      return;
+    }
 
+    // Disable button + spinner
     btnRegister.disabled = true;
     btnText.innerHTML = '<span class="spinner"></span>Registering…';
-    regMsg.className = 'status'; regMsg.textContent = '';
+    regMsg.className = 'status';
+    regMsg.textContent = '';
 
-    try {
+    try{
       const res = await fetch(`${N8N}/webhook/rg/register`, {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify(data)
       });
       const j = await res.json().catch(()=>({}));
-      if (res.ok) { regMsg.textContent = '✅ Registered'; regMsg.className = 'status ok'; }
-      else { regMsg.textContent = 'Registration error: ' + (j.error || res.status); regMsg.className = 'status err'; }
-    } catch(err) { regMsg.textContent = 'Network error: ' + err; regMsg.className = 'status err'; }
-    finally { btnRegister.disabled = false; btnText.textContent = 'Register'; }
+      if(res.ok){
+        regMsg.textContent = '✅ Registered';
+        regMsg.className = 'status ok';
+      } else {
+        regMsg.textContent = 'Registration error: ' + (j.error || res.status);
+        regMsg.className = 'status err';
+      }
+    }catch(err){
+      regMsg.textContent = 'Network error: ' + err;
+      regMsg.className = 'status err';
+    }finally{
+      btnRegister.disabled = false;
+      btnText.textContent = 'Register';
+    }
   });
 
-  // Simulation button
+  // Create 10 orders
   const btn10 = document.getElementById('btn10');
   const simMsg = document.getElementById('simMsg');
-  const ratio = document.getElementById('ratio');
 
   btn10.addEventListener('click', async ()=>{
-    simMsg.textContent = 'Creating...'; simMsg.className = 'status';
+    simMsg.textContent = 'Creating...';
+    simMsg.className = 'status';
     const company = regForm.company.value || 'Demo Co';
-    const mismatch_ratio = parseFloat(ratio.value);
     btn10.disabled = true;
-    try {
+
+    try{
       const res = await fetch(`${N8N}/webhook/rg/simulate`, {
         method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ company, count: 10, mismatch_ratio })
+        body: JSON.stringify({ company, count: 10 })
       });
       const j = await res.json().catch(()=>({}));
-      if (res.ok) { simMsg.textContent = `✅ Created ${j.generated||10} orders for ${j.company||company}. Check your alerts.`; simMsg.className = 'status ok'; }
-      else { simMsg.textContent = 'Simulation error: ' + (j.error || res.status); simMsg.className = 'status err'; }
-    } catch(err) { simMsg.textContent = 'Network error: ' + err; simMsg.className = 'status err'; }
-    finally { btn10.disabled = false; }
+      if(res.ok){
+        simMsg.textContent = `✅ Created ${j.generated||10} orders for ${j.company||company}. Check your alerts.`;
+        simMsg.className = 'status ok';
+      }else{
+        simMsg.textContent = 'Simulation error: ' + (j.error || res.status);
+        simMsg.className = 'status err';
+      }
+    }catch(err){
+      simMsg.textContent = 'Network error: ' + err;
+      simMsg.className = 'status err';
+    }finally{
+      btn10.disabled = false;
+    }
   });
   </script>
 </body>
