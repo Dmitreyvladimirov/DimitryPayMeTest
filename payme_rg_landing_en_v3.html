@@ -189,7 +189,7 @@
   </main>
 
   <script>
-  // Your n8n domain
+  // Your n8n domain (Cloud)
   const N8N = "https://dmitreyvladimirovic.app.n8n.cloud"; // no trailing slash
 
   // WhatsApp join QR/link (Twilio Sandbox)
@@ -199,21 +199,57 @@
   elLink.href = WA_JOIN_LINK;
   elQr.src = "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=" + encodeURIComponent(WA_JOIN_LINK);
 
-  // Field error helpers
+  // --- Helpers: UI errors ---
   function setFieldError(name, msg){ const el = document.getElementById('err-' + name); if (el) el.textContent = msg || ''; }
   function clearErrors(){ ['company','name','email','whatsapp','telegram','channel'].forEach(n => setFieldError(n, '')); }
 
-  // ✅ Fixed email regex (single backslashes)
   function validateEmail(v){ if (!v) return true; return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
   function validateWhatsApp(v){ return !!(v && v.trim().length >= 6); }
   function validateTelegram(v){ if (!v) return true; return v.startsWith('@'); }
 
+  // --- Robust sender: tries /webhook then /webhook-test; falls back to opaque no-cors if needed ---
+  async function postSmart(path, payload){
+    const endpoints = [`${N8N}/webhook${path}`, `${N8N}/webhook-test${path}`];
+
+    for (const url of endpoints){
+      // 1) Normal CORS JSON
+      try{
+        const res = await fetch(url, {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify(payload),
+          mode:'cors',
+          credentials:'omit',
+        });
+        // If CORS is not allowed, fetch throws before here. If we get here, we can read status.
+        if (res.ok) {
+          const j = await res.json().catch(()=>({}));
+          return {ok:true, url, mode:'cors', data:j};
+        }
+        // Non-2xx → try next endpoint
+      }catch(e){
+        // 2) Fallback: opaque fire-and-forget (no-cors)
+        try{
+          await fetch(url, {
+            method:'POST',
+            mode:'no-cors',
+            body: JSON.stringify(payload) // server may see raw body; configure webhook to parse raw if needed
+          });
+          return {ok:true, url, mode:'no-cors', data:null};
+        }catch(e2){
+          // continue loop → next endpoint
+        }
+      }
+    }
+    throw new Error('All endpoints failed');
+  }
+
+  // --- Registration submit ---
   const regForm = document.getElementById('regForm');
   const regMsg = document.getElementById('regMsg');
   const btnRegister = document.getElementById('btnRegister');
   const btnText = btnRegister.querySelector('.btn-text');
 
-  // Registration submit
   regForm.addEventListener('submit', async (e)=>{
     e.preventDefault();
     clearErrors();
@@ -233,27 +269,19 @@
       return;
     }
 
-    // Disable button + spinner
     btnRegister.disabled = true;
     btnText.innerHTML = '<span class="spinner"></span>Registering…';
     regMsg.className = 'status';
     regMsg.textContent = '';
 
     try{
-      const res = await fetch(`${N8N}/webhook/rg/register`, {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify(data)
-      });
-      const j = await res.json().catch(()=>({}));
-      if(res.ok){
-        regMsg.textContent = '✅ Registered';
-        regMsg.className = 'status ok';
-      } else {
-        regMsg.textContent = 'Registration error: ' + (j.error || res.status);
-        regMsg.className = 'status err';
-      }
+      const r = await postSmart('/rg/register', data);
+      regMsg.textContent = (r.mode === 'no-cors')
+        ? '✅ Sent (awaiting server). If nothing happens, activate the workflow or enable CORS in n8n.'
+        : '✅ Registered';
+      regMsg.className = 'status ok';
     }catch(err){
-      regMsg.textContent = 'Network error: ' + err;
+      regMsg.textContent = 'Network error: ' + err.message;
       regMsg.className = 'status err';
     }finally{
       btnRegister.disabled = false;
@@ -261,7 +289,7 @@
     }
   });
 
-  // Create 10 orders
+  // --- Create 10 orders ---
   const btn10 = document.getElementById('btn10');
   const simMsg = document.getElementById('simMsg');
 
@@ -272,25 +300,24 @@
     btn10.disabled = true;
 
     try{
-      const res = await fetch(`${N8N}/webhook/rg/simulate`, {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ company, count: 10 })
-      });
-      const j = await res.json().catch(()=>({}));
-      if(res.ok){
-        simMsg.textContent = `✅ Created ${j.generated||10} orders for ${j.company||company}. Check your alerts.`;
-        simMsg.className = 'status ok';
-      }else{
-        simMsg.textContent = 'Simulation error: ' + (j.error || res.status);
-        simMsg.className = 'status err';
-      }
+      const r = await postSmart('/rg/simulate', { company, count: 10 });
+      simMsg.textContent = (r.mode === 'no-cors')
+        ? `✅ Sent for ${company}. If alerts don’t arrive, activate the workflow or enable CORS in n8n.`
+        : `✅ Created 10 orders for ${company}. Check your alerts.`;
+      simMsg.className = 'status ok';
     }catch(err){
-      simMsg.textContent = 'Network error: ' + err;
+      simMsg.textContent = 'Network error: ' + err.message;
       simMsg.className = 'status err';
     }finally{
       btn10.disabled = false;
     }
   });
+
+  // Prepare WhatsApp join QR
+  (function(){
+    const img = document.getElementById('qr');
+    img.src = "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=" + encodeURIComponent(WA_JOIN_LINK);
+  })();
   </script>
 </body>
 </html>
