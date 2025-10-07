@@ -6,87 +6,40 @@
   <title>PayMe × Reconciliation Guardian — Demo</title>
   <meta name="description" content="Reconciliation Guardian demo for PayMe: registration, WhatsApp connection, and order simulation.">
   <style>
-    :root{
-      --bg:#0b1220; --card:#111827; --muted:#9aa3b2; --text:#e5e7eb;
-      --primary:#2563eb; --accent:#22c55e; --danger:#ef4444; --border:#1f2937; --ring:rgba(37,99,235,.4);
-      --shadow: 0 10px 25px rgba(0,0,0,.35);
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      background: radial-gradient(1200px 800px at 80% -10%, rgba(37,99,235,.25), transparent 60%),
-                  radial-gradient(900px 600px at -10% 20%, rgba(34,197,94,.18), transparent 60%), var(--bg);
-      color:var(--text);
-      font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans";
-      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
-    }
+    :root{--bg:#0b1220;--card:#111827;--muted:#9aa3b2;--text:#e5e7eb;--primary:#2563eb;--accent:#22c55e;--danger:#ef4444;--border:#1f2937;--ring:rgba(37,99,235,.4);--shadow:0 10px 25px rgba(0,0,0,.35)}
+    *{box-sizing:border-box} html,body{height:100%}
+    body{margin:0;background:radial-gradient(1200px 800px at 80% -10%, rgba(37,99,235,.25), transparent 60%),radial-gradient(900px 600px at -10% 20%, rgba(34,197,94,.18), transparent 60%),var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto}
     .container{max-width:1080px;margin:0 auto;padding:24px}
-    header{
-      display:flex;align-items:center;justify-content:space-between;gap:16px;position:sticky;top:0;
-      background:linear-gradient(180deg, rgba(11,18,32,.95), rgba(11,18,32,.75)); backdrop-filter: blur(6px);
-      border-bottom:1px solid var(--border); z-index:10;
-    }
+    header{display:flex;align-items:center;justify-content:space-between;gap:16px;position:sticky;top:0;background:linear-gradient(180deg, rgba(11,18,32,.95), rgba(11,18,32,.75));backdrop-filter:blur(6px);border-bottom:1px solid var(--border);z-index:10}
     .brand{display:flex;align-items:center;gap:12px;padding:10px 0}
-    .brand svg{display:block}
     .badge{font-size:12px;color:#cbd5e1;background:#0b1328;border:1px solid #1e2a44;padding:4px 8px;border-radius:999px}
     .pill{display:inline-block;padding:6px 10px;border-radius:999px;border:1px solid #233252;background:#0b1326;color:#cbd5e1;font-size:12px}
     .hero{display:grid;grid-template-columns:1.2fr 1fr;gap:28px;align-items:center;margin:28px 0 18px}
-    @media (max-width: 900px){ .hero{grid-template-columns:1fr} }
-    h1{font-size:36px;line-height:1.15;margin:8px 0 12px}
-    p.lead{color:#c9d3e4;font-size:18px;margin:0 0 16px}
-    .card{
-      background:linear-gradient(180deg, #0f172a, #0b1326);
-      border:1px solid var(--border);
-      border-radius:16px;padding:18px;box-shadow:var(--shadow);
-    }
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-    @media (max-width: 800px){ .grid{grid-template-columns:1fr} }
+    @media (max-width:900px){.hero{grid-template-columns:1fr}}
+    h1{font-size:36px;line-height:1.15;margin:8px 0 12px} p.lead{color:#c9d3e4;font-size:18px;margin:0 0 16px}
+    .card{background:linear-gradient(180deg,#0f172a,#0b1326);border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:var(--shadow)}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px} @media (max-width:800px){.grid{grid-template-columns:1fr}}
     label{display:block;margin:8px 0 6px;font-weight:600;color:#cfe0ff}
-    input,select,button{
-      width:100%;padding:12px 14px;border-radius:12px;border:1px solid #22314f;background:#0b1220;color:var(--text);
-      outline:0;transition:.2s ease;box-shadow:0 0 0 0 var(--ring);
-    }
+    input,select,button{width:100%;padding:12px 14px;border-radius:12px;border:1px solid #22314f;background:#0b1220;color:var(--text);outline:0;transition:.2s;box-shadow:0 0 0 0 var(--ring)}
     input:focus,select:focus{box-shadow:0 0 0 6px var(--ring);border-color:var(--primary)}
-    .btn{background:linear-gradient(180deg, var(--primary), #1d4ed8);border-color:#1e40af;font-weight:700;letter-spacing:.2px}
+    .btn{background:linear-gradient(180deg,var(--primary),#1d4ed8);border-color:#1e40af;font-weight:700;letter-spacing:.2px}
     .btn:hover{filter:brightness(1.06);transform:translateY(-1px)}
-    .btn.success{background:linear-gradient(180deg, #16a34a, #15803d);border-color:#14532d}
-    .btn.secondary{background:#0b1326;border-color:#22314f}
-    .row{display:flex;gap:12px;flex-wrap:wrap}
-    .row > div{flex:1 1 260px}
-    .muted{color:var(--muted);font-size:13px}
-    .status{margin-top:10px;min-height:22px}
-    .ok{color:var(--accent)}
-    .err{color:var(--danger)}
+    .btn.success{background:linear-gradient(180deg,#16a34a,#15803d);border-color:#14532d}
+    .row{display:flex;gap:12px;flex-wrap:wrap}.muted{color:var(--muted);font-size:13px}
+    .status{margin-top:10px;min-height:22px}.ok{color:var(--accent)}.err{color:var(--danger)}
     .divider{height:1px;background:linear-gradient(90deg,transparent,#1f2b47,transparent);margin:18px 0}
-    .steps{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
-    .step{padding:8px 12px;border:1px solid #22314f;border-radius:999px;background:#0b1326;font-size:13px}
-    footer{margin:20px 0 40px;color:#94a3b8;font-size:13px;text-align:center}
-    .qrwrap{display:flex;align-items:center;gap:16px}
-    .qrwrap img{border-radius:12px;border:1px solid #22314f}
-    .feature{display:flex;align-items:center;gap:10px}
-    .feature .dot{width:10px;height:10px;border-radius:50%;background:var(--primary)}
-    .mini{font-size:12px}
-    .center{display:flex;justify-content:center;align-items:center;gap:12px}
-    .field-error{color:var(--danger);font-size:12px;margin-top:6px;min-height:14px}
-    .hint{color:#aab4c4;font-size:12px;margin-top:6px}
-    .btn[disabled]{opacity:.7;cursor:not-allowed}
-    .spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite;display:inline-block;vertical-align:-2px;margin-right:8px}
+    .steps{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}.step{padding:8px 12px;border:1px solid #22314f;border-radius:999px;background:#0b1326;font-size:13px}
+    .field-error{color:var(--danger);font-size:12px;margin-top:6px;min-height:14px}.hint{color:#aab4c4;font-size:12px;margin-top:6px}
+    .btn[disabled]{opacity:.7;cursor:not-allowed}.spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite;display:inline-block;vertical-align:-2px;margin-right:8px}
     @keyframes spin{to{transform:rotate(360deg)}}
   </style>
 </head>
 <body>
   <header class="container">
     <div class="brand">
-      <!-- Simple PayMe wordmark (placeholder). Replace with official asset if needed -->
       <svg width="132" height="28" viewBox="0 0 132 28" xmlns="http://www.w3.org/2000/svg" aria-label="PayMe">
-        <defs>
-          <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#60a5fa"/><stop offset="1" stop-color="#2563eb"/>
-          </linearGradient>
-        </defs>
-        <rect width="132" height="28" rx="8" fill="url(#g)" opacity="0.15"/>
-        <text x="12" y="20" fill="#cfe0ff" font-family="system-ui,Segoe UI,Arial" font-size="16" font-weight="700">PayMe</text>
+        <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#60a5fa"/><stop offset="1" stop-color="#2563eb"/></linearGradient></defs>
+        <rect width="132" height="28" rx="8" fill="url(#g)" opacity="0.15"/><text x="12" y="20" fill="#cfe0ff" font-family="system-ui,Segoe UI,Arial" font-size="16" font-weight="700">PayMe</text>
       </svg>
       <span class="badge">Reconciliation Guardian · Demo</span>
     </div>
@@ -97,193 +50,109 @@
     <section class="hero">
       <div>
         <h1>Real-time payment mismatch protection</h1>
-        <p class="lead">This demo shows how PayMe evolves from a “passive” gateway to an <b>active financial guardian</b>. Register → connect WhatsApp → create 10 orders → get instant mismatch alerts.</p>
-        <div class="steps">
-          <div class="step">1. Register</div>
-          <div class="step">2. Join WhatsApp</div>
-          <div class="step">3. Create 10 orders</div>
-          <div class="step">4. Receive alerts</div>
-        </div>
+        <p class="lead">Register → connect WhatsApp → create 10 orders → get instant mismatch alerts.</p>
+        <div class="steps"><div class="step">1. Register</div><div class="step">2. Join WhatsApp</div><div class="step">3. Create 10 orders</div><div class="step">4. Receive alerts</div></div>
       </div>
       <div class="card">
-        <div class="feature"><span class="dot"></span><strong>Single source of truth:</strong> powered by PayMe’s first-party data</div>
-        <div class="divider"></div>
-        <div class="feature"><span class="dot"></span><strong>No store integration needed:</strong> demo runs on synthetic data</div>
-        <div class="divider"></div>
-        <div class="feature"><span class="dot"></span><strong>Multi-channel alerts:</strong> WhatsApp, Email, or Telegram</div>
+        <div><b>Single source of truth:</b> PayMe’s first-party data</div><div class="divider"></div>
+        <div><b>No store integration needed:</b> synthetic data</div><div class="divider"></div>
+        <div><b>Multi-channel alerts:</b> WhatsApp, Email, Telegram</div>
       </div>
     </section>
 
     <section class="card">
       <h2 style="margin:0 0 8px">1) Registration</h2>
-      <p class="muted mini">Fill the form — a new record will be created in the <b>Companies</b> table in Airtable.</p>
+      <p class="muted mini">A new record will be created in the <b>Companies</b> Airtable table.</p>
       <form id="regForm" autocomplete="off" novalidate>
         <div class="grid">
-          <div>
-            <label>Company</label>
-            <input name="company" autocomplete="off" placeholder="Demo Co">
-            <div class="field-error" id="err-company"></div>
-          </div>
-          <div>
-            <label>Name</label>
-            <input name="name" autocomplete="off" placeholder="Alex">
-            <div class="field-error" id="err-name"></div>
-          </div>
-          <div>
-            <label>Email</label>
-            <input name="email" autocomplete="off" type="email" placeholder="ops@example.com">
-            <div class="field-error" id="err-email"></div>
-          </div>
-          <div>
-            <label>WhatsApp</label>
-            <input name="whatsapp" autocomplete="off" placeholder="+9725XXXXXXXX or 052XXXXXXX">
-            <div class="hint">Format: international or local (e.g., +9725…, 052…)</div>
-            <div class="field-error" id="err-whatsapp"></div>
-          </div>
-          <div>
-            <label>Telegram ID <span class="muted">(optional)</span></label>
-            <input name="telegram" autocomplete="off" placeholder="@example">
-            <div class="field-error" id="err-telegram"></div>
-          </div>
-          <div>
-            <label>Alert channel</label>
-            <select name="channel">
-              <option value="whatsapp" selected>WhatsApp</option>
-              <option value="email">Email</option>
-              <option value="telegram">Telegram</option>
-            </select>
-            <div class="field-error" id="err-channel"></div>
+          <div><label>Company</label><input name="company" placeholder="Demo Co"><div id="err-company" class="field-error"></div></div>
+          <div><label>Name</label><input name="name" placeholder="Alex"><div id="err-name" class="field-error"></div></div>
+          <div><label>Email</label><input name="email" type="email" placeholder="ops@example.com"><div id="err-email" class="field-error"></div></div>
+          <div><label>WhatsApp</label><input name="whatsapp" placeholder="+9725XXXXXXXX or 052XXXXXXX"><div class="hint">Format: +9725… or 052…</div><div id="err-whatsapp" class="field-error"></div></div>
+          <div><label>Telegram ID <span class="muted">(optional)</span></label><input name="telegram" placeholder="@example"><div id="err-telegram" class="field-error"></div></div>
+          <div><label>Alert channel</label>
+            <select name="channel"><option value="whatsapp" selected>WhatsApp</option><option value="email">Email</option><option value="telegram">Telegram</option></select>
+            <div id="err-channel" class="field-error"></div>
           </div>
         </div>
-        <div class="center" style="margin-top:16px">
+        <div class="row" style="margin-top:16px">
           <button class="btn" id="btnRegister" type="submit"><span class="btn-text">Register</span></button>
+          <div class="status" id="regMsg"></div>
         </div>
-        <div class="status center" id="regMsg"></div>
       </form>
     </section>
 
     <section class="card">
       <h2 style="margin:0 0 8px">2) Join the WhatsApp Sandbox</h2>
-      <p class="muted mini">Click the link or scan the QR to enable receiving messages in the WhatsApp sandbox.</p>
-      <div class="qrwrap">
+      <p class="muted mini">Click the link or scan the QR to enable receiving messages in WhatsApp sandbox.</p>
+      <div class="row" style="align-items:center">
         <img id="qr" width="164" height="164" alt="Scan to join WhatsApp sandbox">
-        <div>
-          <a id="waLink" class="btn secondary" style="display:inline-block;width:auto" target="_blank" rel="noopener">Open WhatsApp with join code</a>
-          <div class="muted mini" style="margin-top:10px">Once connected, this number will receive alerts.</div>
-        </div>
+        <a id="waLink" class="btn success" style="display:inline-block;width:auto" target="_blank" rel="noopener">Open WhatsApp with join code</a>
       </div>
     </section>
 
     <section class="card">
       <h2 style="margin:0 0 8px">3) Order simulation</h2>
-      <p class="muted mini">We will create 10 orders for your company. Any mismatch between the platform and PayMe statuses will trigger an instant alert to your selected channel.</p>
+      <p class="muted mini">We will create 10 orders for your company. Any mismatch triggers an instant alert.</p>
       <div class="row" style="margin-top:12px">
-        <div><button class="btn success" id="btn10" type="button">Create 10 orders</button></div>
+        <button class="btn success" id="btn10" type="button">Create 10 orders</button>
         <div class="status" id="simMsg"></div>
       </div>
     </section>
 
-    <footer>
-      <div>Demo interface · single-file version for the PayMe presentation</div>
-    </footer>
+    <footer><div>Demo interface · single-file version for the PayMe presentation</div></footer>
   </main>
 
   <script>
-  // === Config ===
-  const N8N = "https://dmitreyvladimirovic.app.n8n.cloud"; // your n8n Cloud domain (no trailing slash)
-  const ORIGIN_HINT = "Make sure Respond to Webhook in n8n returns header: Access-Control-Allow-Origin: https://dmitreyvladimirov.github.io";
-
-  // WhatsApp join QR/link (Twilio Sandbox)
+  const N8N = "https://dmitreyvladimirovic.app.n8n.cloud";
   const WA_JOIN_LINK = "https://wa.me/14155238886?text=join%20south-public";
   document.getElementById('waLink').href = WA_JOIN_LINK;
   document.getElementById('qr').src = "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=" + encodeURIComponent(WA_JOIN_LINK);
 
-  // --- Helpers: validation & errors ---
   function setFieldError(name, msg){ const el = document.getElementById('err-' + name); if (el) el.textContent = msg || ''; }
   function clearErrors(){ ['company','name','email','whatsapp','telegram','channel'].forEach(n => setFieldError(n, '')); }
-
-  function validateEmail(v){ if (!v) return true; return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+  function validateEmail(v){ if (!v) return true; return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(v); }
   function validateWhatsApp(v){ return !!(v && v.trim().length >= 6); }
   function validateTelegram(v){ if (!v) return true; return v.startsWith('@'); }
 
-  // --- Registration submit (simple request: x-www-form-urlencoded to avoid preflight) ---
   const regForm = document.getElementById('regForm');
   const regMsg = document.getElementById('regMsg');
-  const btnRegister = document.getElementById('btnRegister');
-  const btnText = btnRegister.querySelector('.btn-text');
+  const btnRegister = document.getElementById('btnRegister'); const btnText = btnRegister.querySelector('.btn-text');
 
   regForm.addEventListener('submit', async (e)=>{
-    e.preventDefault();
-    clearErrors();
-    regMsg.textContent = '';
-    let ok = true;
-    const data = Object.fromEntries(new FormData(regForm).entries());
+    e.preventDefault(); clearErrors(); regMsg.textContent='';
+    let ok = true; const data = Object.fromEntries(new FormData(regForm).entries());
+    if (!data.company?.trim()) setFieldError('company','Company is required.'), ok=false;
+    if (!data.name?.trim()) setFieldError('name','Name is required.'), ok=false;
+    if (!validateEmail(data.email)) setFieldError('email','Invalid email.'), ok=false;
+    if (!validateWhatsApp(data.whatsapp)) setFieldError('whatsapp','WhatsApp number is required.'), ok=false;
+    if (!validateTelegram(data.telegram)) setFieldError('telegram','Telegram ID should start with @.'), ok=false;
+    if (!ok){ regMsg.textContent='Please fix the highlighted errors.'; regMsg.className='status err'; return; }
 
-    if (!data.company?.trim()) { setFieldError('company','Company is required.'); ok = false; }
-    if (!data.name?.trim())    { setFieldError('name','Name is required.'); ok = false; }
-    if (!validateEmail(data.email))        { setFieldError('email','Invalid email.'); ok = false; }
-    if (!validateWhatsApp(data.whatsapp))  { setFieldError('whatsapp','WhatsApp number is required.'); ok = false; }
-    if (!validateTelegram(data.telegram))  { setFieldError('telegram','Telegram ID should start with @.'); ok = false; }
-    if (!ok) { regMsg.textContent = 'Please fix the highlighted errors.'; regMsg.className = 'status err'; return; }
-
-    btnRegister.disabled = true;
-    btnText.innerHTML = '<span class="spinner"></span>Registering…';
-    regMsg.className = 'status'; regMsg.textContent = '';
-
-    try {
-      const body = new URLSearchParams(data).toString();
-      const res = await fetch(`${N8N}/webhook/rg/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body
-      });
-      let j = {}; try { j = await res.json(); } catch {}
-      if (res.ok) {
-        regMsg.textContent = '✅ Registered';
-        regMsg.className = 'status ok';
-      } else {
-        regMsg.textContent = 'Registration error: ' + (j.error || res.status);
-        regMsg.className = 'status err';
-      }
-    } catch (err) {
-      regMsg.textContent = 'Network error: ' + err + ' — ' + ORIGIN_HINT;
-      regMsg.className = 'status err';
-    } finally {
-      btnRegister.disabled = false;
-      btnText.textContent = 'Register';
-    }
-  });
-
-  // --- Create 10 orders (simple request: x-www-form-urlencoded) ---
-  const btn10 = document.getElementById('btn10');
-  const simMsg = document.getElementById('simMsg');
-
-  btn10.addEventListener('click', async ()=>{
-    simMsg.textContent = 'Creating...'; simMsg.className = 'status';
-    const company = regForm.company.value || 'Demo Co';
-    btn10.disabled = true;
+    btnRegister.disabled = true; btnText.innerHTML = '<span class="spinner"></span>Registering…'; regMsg.className='status';
 
     try{
-      const body = new URLSearchParams({ company, count: '10' }).toString();
-      const res = await fetch(`${N8N}/webhook/rg/simulate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body
-      });
-      let j = {}; try { j = await res.json(); } catch {}
-      if (res.ok){
-        simMsg.textContent = `✅ Created ${j.generated || 10} orders for ${j.company || company}. Check your alerts.`;
-        simMsg.className = 'status ok';
-      } else {
-        simMsg.textContent = 'Simulation error: ' + (j.error || res.status);
-        simMsg.className = 'status err';
-      }
-    }catch(err){
-      simMsg.textContent = 'Network error: ' + err + ' — ' + ORIGIN_HINT;
-      simMsg.className = 'status err';
-    }finally{
-      btn10.disabled = false;
-    }
+      const body = new URLSearchParams(data).toString();
+      const res = await fetch(`${N8N}/webhook/rg/register`, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body });
+      let j={}; try{ j = await res.json(); }catch{}
+      if(res.ok){ regMsg.textContent = '✅ Registered'; regMsg.className='status ok'; }
+      else { regMsg.textContent = 'Registration error: ' + (j.error || res.status); regMsg.className='status err'; }
+    }catch(err){ regMsg.textContent = 'Network error: ' + err; regMsg.className='status err'; }
+    finally{ btnRegister.disabled=false; btnText.textContent='Register'; }
+  });
+
+  const btn10 = document.getElementById('btn10'); const simMsg = document.getElementById('simMsg');
+  btn10.addEventListener('click', async ()=>{
+    simMsg.textContent='Creating...'; simMsg.className='status'; btn10.disabled=true;
+    const company = regForm.company.value || 'Demo Co';
+    try{
+      const body = new URLSearchParams({company, count:'10'}).toString();
+      const res = await fetch(`${N8N}/webhook/rg/simulate`, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body });
+      let j={}; try{ j = await res.json(); }catch{}
+      if(res.ok){ simMsg.textContent = `✅ Created ${j.generated||10} orders for ${j.company||company}. Check your alerts.`; simMsg.className='status ok'; }
+      else { simMsg.textContent = 'Simulation error: ' + (j.error || res.status); simMsg.className='status err'; }
+    }catch(err){ simMsg.textContent = 'Network error: ' + err; simMsg.className='status err'; }
+    finally{ btn10.disabled=false; }
   });
   </script>
 </body>
