@@ -1,3 +1,22 @@
+ох, это на мне — валидация email сломалась из-за лишних обратных слешей в RegExp. Я поправил функцию `validateEmail` (и оставил всё остальное как ты просил: без Twilio creds, с твоим n8n-доменом, без выбора mismatch-ratio и без блока с вебхуками). Ниже — полностью обновлённый `index.html` для GitHub Pages.
+
+**Что было не так:** в прошлой версии был такой код:
+
+```js
+/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/
+```
+
+Из-за `\\.` он требовал в адресе обратный слеш перед точкой. Правильно — один слеш:
+
+```js
+/^[^\s@]+@[^\s@]+\.[^\s@]+$/
+```
+
+---
+
+### Готовый файл `index.html`
+
+```html
 <!doctype html>
 <html lang="en">
 <head>
@@ -28,7 +47,6 @@
       border-bottom:1px solid var(--border); z-index:10;
     }
     .brand{display:flex;align-items:center;gap:12px;padding:10px 0}
-    /* simple PayMe wordmark (inline SVG) */
     .brand svg{display:block}
     .badge{font-size:12px;color:#cbd5e1;background:#0b1328;border:1px solid #1e2a44;padding:4px 8px;border-radius:999px}
     .pill{display:inline-block;padding:6px 10px;border-radius:999px;border:1px solid #233252;background:#0b1326;color:#cbd5e1;font-size:12px}
@@ -67,7 +85,6 @@
     .qrwrap img{border-radius:12px;border:1px solid #22314f}
     .feature{display:flex;align-items:center;gap:10px}
     .feature .dot{width:10px;height:10px;border-radius:50%;background:var(--primary)}
-    .code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;background:#0b1220;border:1px solid #233252;border-radius:10px;padding:8px 10px;color:#cbd5e1}
     .mini{font-size:12px}
     .center{display:flex;justify-content:center;align-items:center;gap:12px}
     .field-error{color:var(--danger);font-size:12px;margin-top:6px;min-height:14px}
@@ -80,7 +97,7 @@
 <body>
   <header class="container">
     <div class="brand">
-      <!-- PayMe styled wordmark (replace with official logo file if desired) -->
+      <!-- Simple PayMe wordmark (placeholder). Replace with official asset if needed -->
       <svg width="132" height="28" viewBox="0 0 132 28" xmlns="http://www.w3.org/2000/svg" aria-label="PayMe">
         <defs>
           <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
@@ -191,7 +208,7 @@
   </main>
 
   <script>
-  // Configuration (your n8n domain)
+  // Your n8n domain
   const N8N = "https://dmitreyvladimirovic.app.n8n.cloud"; // no trailing slash
 
   // WhatsApp join QR/link (Twilio Sandbox)
@@ -204,7 +221,9 @@
   // Field error helpers
   function setFieldError(name, msg){ const el = document.getElementById('err-' + name); if (el) el.textContent = msg || ''; }
   function clearErrors(){ ['company','name','email','whatsapp','telegram','channel'].forEach(n => setFieldError(n, '')); }
-  function validateEmail(v){ if (!v) return true; return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(v); }
+
+  // ✅ Fixed email regex (single backslashes)
+  function validateEmail(v){ if (!v) return true; return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
   function validateWhatsApp(v){ return !!(v && v.trim().length >= 6); }
   function validateTelegram(v){ if (!v) return true; return v.startsWith('@'); }
 
@@ -294,3 +313,6 @@
   </script>
 </body>
 </html>
+```
+
+Если после этой правки что-то ещё ругается — пришли текст ошибки/скрин (или URL GitHub Pages), я сразу подскажу, что поправить.
