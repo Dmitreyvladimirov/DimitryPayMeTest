@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PayMe × Reconciliation Guardian — Demo</title>
-  <meta name="description" content="Reconciliation Guardian demo for PayMe: registration and WhatsApp-triggered order simulation.">
+  <meta name="description" content="Reconciliation Guardian demo for PayMe: registration, WhatsApp connection, and order simulation.">
   <style>
     :root{--bg:#0b1220;--card:#111827;--muted:#9aa3b2;--text:#e5e7eb;--primary:#2563eb;--accent:#22c55e;--danger:#ef4444;--border:#1f2937;--ring:rgba(37,99,235,.4);--shadow:0 10px 25px rgba(0,0,0,.35)}
     *{box-sizing:border-box} html,body{height:100%}
@@ -24,6 +24,7 @@
     input:focus,select:focus{box-shadow:0 0 0 6px var(--ring);border-color:var(--primary)}
     .btn{background:linear-gradient(180deg,var(--primary),#1d4ed8);border-color:#1e40af;font-weight:700;letter-spacing:.2px}
     .btn:hover{filter:brightness(1.06);transform:translateY(-1px)}
+    .btn.success{background:linear-gradient(180deg,#16a34a,#15803d);border-color:#14532d}
     .row{display:flex;gap:12px;flex-wrap:wrap}.muted{color:var(--muted);font-size:13px}
     .status{margin-top:10px;min-height:22px}.ok{color:var(--accent)}.err{color:var(--danger)}
     .divider{height:1px;background:linear-gradient(90deg,transparent,#1f2b47,transparent);margin:18px 0}
@@ -49,13 +50,8 @@
     <section class="hero">
       <div>
         <h1>Real-time payment mismatch protection</h1>
-        <p class="lead">Register → join WhatsApp → in the chat send <b>orders</b> to generate demo orders for <i>your</i> company. Mismatches trigger instant alerts.</p>
-        <div class="steps">
-          <div class="step">1. Register</div>
-          <div class="step">2. Join WhatsApp</div>
-          <div class="step">3. Send “orders” in WhatsApp</div>
-          <div class="step">4. Receive alerts</div>
-        </div>
+        <p class="lead">Register → connect WhatsApp → create 10 orders → get instant mismatch alerts.</p>
+        <div class="steps"><div class="step">1. Register</div><div class="step">2. Join WhatsApp</div><div class="step">3. Create 10 orders</div><div class="step">4. Receive alerts</div></div>
       </div>
       <div class="card">
         <div><b>Single source of truth:</b> PayMe’s first-party data</div><div class="divider"></div>
@@ -72,10 +68,92 @@
           <div><label>Company</label><input name="company" placeholder="Demo Co"><div id="err-company" class="field-error"></div></div>
           <div><label>Name</label><input name="name" placeholder="Alex"><div id="err-name" class="field-error"></div></div>
           <div><label>Email</label><input name="email" type="email" placeholder="ops@example.com"><div id="err-email" class="field-error"></div></div>
-          <div>
-            <label>WhatsApp</label>
-            <input name="whatsapp" placeholder="+9725XXXXXXXX or 05XXXXXXXXX" id="wa">
-            <div class="hint">You can enter +9725… or 05… — we will convert to +972 automatically.</div>
-            <div id="err-whatsapp" class="field-error"></div>
+          <div><label>WhatsApp</label><input name="whatsapp" placeholder="+9725XXXXXXXX or 052XXXXXXX"><div class="hint">Format: +9725… or 052…</div><div id="err-whatsapp" class="field-error"></div></div>
+          <div><label>Telegram ID <span class="muted">(optional)</span></label><input name="telegram" placeholder="@example"><div id="err-telegram" class="field-error"></div></div>
+          <div><label>Alert channel</label>
+            <select name="channel"><option value="whatsapp" selected>WhatsApp</option><option value="email">Email</option><option value="telegram">Telegram</option></select>
+            <div id="err-channel" class="field-error"></div>
           </div>
-          <div><label>Telegram ID <span class="muted">(option
+        </div>
+        <div class="row" style="margin-top:16px">
+          <button class="btn" id="btnRegister" type="submit"><span class="btn-text">Register</span></button>
+          <div class="status" id="regMsg"></div>
+        </div>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2 style="margin:0 0 8px">2) Join the WhatsApp Sandbox</h2>
+      <p class="muted mini">Click the link or scan the QR to enable receiving messages in WhatsApp sandbox.</p>
+      <div class="row" style="align-items:center">
+        <img id="qr" width="164" height="164" alt="Scan to join WhatsApp sandbox">
+        <a id="waLink" class="btn success" style="display:inline-block;width:auto" target="_blank" rel="noopener">Open WhatsApp with join code</a>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 style="margin:0 0 8px">3) Order simulation</h2>
+      <p class="muted mini">We will create 10 orders for your company. Any mismatch triggers an instant alert.</p>
+      <div class="row" style="margin-top:12px">
+        <button class="btn success" id="btn10" type="button">Create 10 orders</button>
+        <div class="status" id="simMsg"></div>
+      </div>
+    </section>
+
+    <footer><div>Demo interface · single-file version for the PayMe presentation</div></footer>
+  </main>
+
+  <script>
+  const N8N = "https://dmitreyvladimirovic.app.n8n.cloud";
+  const WA_JOIN_LINK = "https://wa.me/14155238886?text=join%20south-public";
+  document.getElementById('waLink').href = WA_JOIN_LINK;
+  document.getElementById('qr').src = "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=" + encodeURIComponent(WA_JOIN_LINK);
+
+  function setFieldError(name, msg){ const el = document.getElementById('err-' + name); if (el) el.textContent = msg || ''; }
+  function clearErrors(){ ['company','name','email','whatsapp','telegram','channel'].forEach(n => setFieldError(n, '')); }
+  function validateEmail(v){ if (!v) return true; return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(v); }
+  function validateWhatsApp(v){ return !!(v && v.trim().length >= 6); }
+  function validateTelegram(v){ if (!v) return true; return v.startsWith('@'); }
+
+  const regForm = document.getElementById('regForm');
+  const regMsg = document.getElementById('regMsg');
+  const btnRegister = document.getElementById('btnRegister'); const btnText = btnRegister.querySelector('.btn-text');
+
+  regForm.addEventListener('submit', async (e)=>{
+    e.preventDefault(); clearErrors(); regMsg.textContent='';
+    let ok = true; const data = Object.fromEntries(new FormData(regForm).entries());
+    if (!data.company?.trim()) setFieldError('company','Company is required.'), ok=false;
+    if (!data.name?.trim()) setFieldError('name','Name is required.'), ok=false;
+    if (!validateEmail(data.email)) setFieldError('email','Invalid email.'), ok=false;
+    if (!validateWhatsApp(data.whatsapp)) setFieldError('whatsapp','WhatsApp number is required.'), ok=false;
+    if (!validateTelegram(data.telegram)) setFieldError('telegram','Telegram ID should start with @.'), ok=false;
+    if (!ok){ regMsg.textContent='Please fix the highlighted errors.'; regMsg.className='status err'; return; }
+
+    btnRegister.disabled = true; btnText.innerHTML = '<span class="spinner"></span>Registering…'; regMsg.className='status';
+
+    try{
+      const body = new URLSearchParams(data).toString();
+      const res = await fetch(`${N8N}/webhook/rg/register`, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body });
+      let j={}; try{ j = await res.json(); }catch{}
+      if(res.ok){ regMsg.textContent = '✅ Registered'; regMsg.className='status ok'; }
+      else { regMsg.textContent = 'Registration error: ' + (j.error || res.status); regMsg.className='status err'; }
+    }catch(err){ regMsg.textContent = 'Network error: ' + err; regMsg.className='status err'; }
+    finally{ btnRegister.disabled=false; btnText.textContent='Register'; }
+  });
+
+  const btn10 = document.getElementById('btn10'); const simMsg = document.getElementById('simMsg');
+  btn10.addEventListener('click', async ()=>{
+    simMsg.textContent='Creating...'; simMsg.className='status'; btn10.disabled=true;
+    const company = regForm.company.value || 'Demo Co';
+    try{
+      const body = new URLSearchParams({company, count:'10'}).toString();
+      const res = await fetch(`${N8N}/webhook/rg/simulate`, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body });
+      let j={}; try{ j = await res.json(); }catch{}
+      if(res.ok){ simMsg.textContent = `✅ Created ${j.generated||10} orders for ${j.company||company}. Check your alerts.`; simMsg.className='status ok'; }
+      else { simMsg.textContent = 'Simulation error: ' + (j.error || res.status); simMsg.className='status err'; }
+    }catch(err){ simMsg.textContent = 'Network error: ' + err; simMsg.className='status err'; }
+    finally{ btn10.disabled=false; }
+  });
+  </script>
+</body>
+</html>
