@@ -111,7 +111,7 @@
 
   function setFieldError(name, msg){ const el = document.getElementById('err-' + name); if (el) el.textContent = msg || ''; }
   function clearErrors(){ ['company','name','email','whatsapp','telegram','channel'].forEach(n => setFieldError(n, '')); }
-  function validateEmail(v){ if (!v) return true; return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(v); }
+  function validateEmail(v){ if (!v) return true; return /^[^\s@]+@[^\\s@]+\.[^\\s@]+$/.test(v); }
   function validateWhatsApp(v){ return !!(v && v.trim().length >= 6); }
   function validateTelegram(v){ if (!v) return true; return v.startsWith('@'); }
 
