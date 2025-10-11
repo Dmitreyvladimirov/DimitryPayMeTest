@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Reconciliation Guardian — Demo for PayMe</title>
+  <meta name="description" content="WhatsApp bot that prevents shipping unpaid orders by reconciling PayMe vs. platform status in real time." />
+  <style>
+    :root{
+      --bg:#0f172a;--card:#111827;--muted:#94a3b8;--text:#e2e8f0;--brand:#22d3ee;--brand-2:#38bdf8;--ok:#10b981;--warn:#f59e0b;--err:#ef4444;
+      --radius:16px;--shadow:0 10px 30px rgba(0,0,0,.35)
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    a{color:var(--brand-2);text-decoration:none} a:hover{text-decoration:underline}
+    .container{max-width:1000px;margin:0 auto;padding:24px}
+    .banner{background:linear-gradient(90deg,#0ea5e9, #22d3ee);color:#003044;text-align:center;padding:10px 14px;font-weight:600}
+    .strip{background:#0b1224;border-bottom:1px solid #1f2a44}
+    .strip .container{display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center;font-size:14px;color:var(--muted)}
+    .strip strong{color:#c7d2fe}
+    header{padding:56px 0 24px}
+    .hero{display:grid;grid-template-columns:1.2fr .8fr;gap:28px}
+    @media(max-width:900px){.hero{grid-template-columns:1fr}}
+    .tag{display:inline-block;font-size:12px;padding:6px 10px;border:1px solid #26314f;border-radius:999px;color:#93c5fd;background:#0b1224}
+    h1{font-size:40px;line-height:1.1;margin:12px 0 10px}
+    p.lead{font-size:18px;color:#cbd5e1;margin:0 0 20px}
+    .cta{display:flex;gap:12px;align-items:center}
+    .btn{background:linear-gradient(180deg,var(--brand),var(--brand-2));color:#032238;border:none;border-radius:999px;padding:14px 20px;font-weight:700;cursor:pointer;box-shadow:var(--shadow)}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .ghost{background:#0b1224;color:#dbeafe;border:1px solid #1e293b}
+    .card{background:var(--card);border:1px solid #1f2937;border-radius:var(--radius);padding:22px;box-shadow:var(--shadow)}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+    @media(max-width:900px){.grid-2,.grid-3{grid-template-columns:1fr}}
+    section{padding:28px 0}
+    h2{font-size:28px;margin:0 0 12px}
+    .kvs{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    @media(max-width:900px){.kvs{grid-template-columns:1fr}}
+    .kvs .problem,.kvs .solution{border-left:4px solid #334155;padding-left:14px}
+    .kvs .solution{border-color:var(--ok)}
+    ul.clean{list-style:none;padding:0;margin:10px 0 0}
+    ul.clean li{margin:8px 0;padding-left:24px;position:relative}
+    ul.clean li:before{content:"•";position:absolute;left:0;color:var(--brand)}
+    .how-steps ol{margin:0 0 0 18px}
+    .how-steps li{margin:10px 0}
+    .benefit{border:1px solid #1f2a44;border-radius:14px;padding:16px}
+    .benefit h4{margin:0 0 6px;font-size:16px}
+    .muted{color:var(--muted)}
+    .form-wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
+    @media(max-width:900px){.form-wrap{grid-template-columns:1fr}}
+    form label{display:block;font-size:13px;color:#cbd5e1;margin:10px 0 6px}
+    form input{width:100%;padding:12px 12px;border:1px solid #26314f;border-radius:12px;background:#0b1224;color:#e5e7eb;outline:none}
+    form input:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.2)}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .help{font-size:12px;color:#93a3b8;margin-top:8px}
+    .qr-card{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:22px}
+    .qr-code{width:200px;height:200px;background:#0b1224;border:1px dashed #26314f;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:10px 0}
+    .caps{font-size:12px;letter-spacing:.08em;color:#9ca3af;text-transform:uppercase}
+    footer{padding:28px 0 40px;color:#9aa5b1}
+    .pill{display:inline-block;background:#0b1224;border:1px solid #223051;color:#d1d5db;border-radius:999px;padding:8px 12px}
+    .toast{position:fixed;right:16px;bottom:16px;min-width:260px;max-width:360px;background:#0b1224;border:1px solid #1f2a44;border-left:4px solid var(--ok);color:#e5e7eb;border-radius:12px;padding:12px 14px;box-shadow:var(--shadow);display:none}
+    .toast.err{border-left-color:var(--err)}
+    .small{font-size:12px}
+    .spacer{height:8px}
+    .icon{font-style:normal}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;color:#cbd5e1;background:#0b1224;border:1px solid #1f2a44;padding:2px 6px;border-radius:6px}
+    .inline-steps{display:flex;gap:12px;flex-wrap:wrap}
+    .inline-steps .pill{border-color:#314061}
+  </style>
+</head>
+<body>
+
+  <!-- DEMO BANNER -->
+  <div class="banner">DEMO · Reconciliation Guardian for PayMe — This page demonstrates how the WhatsApp bot prevents shipping unpaid orders.</div>
+
+  <!-- QUICK START STRIP -->
+  <div class="strip">
+    <div class="container">
+      <span class="caps">How to try it:</span>
+      <div class="inline-steps">
+        <span class="pill">Register</span>
+        <span class="pill">Open WhatsApp via <strong>QR / link</strong></span>
+        <span class="pill">Send <span class="mono">start</span> to activate (24h)</span>
+        <span class="pill">Send <span class="mono">orders</span> to create 10 test orders</span>
+        <span class="pill">Get <strong>mismatch alerts</strong> (Platform Paid ≠ PayMe Failed)</span>
+      </div>
+    </div>
+  </div>
+
+  <header class="container">
+    <div class="hero">
+      <div>
+        <span class="tag">Real-time reconciliation</span>
+        <h1>Never ship an unpaid order again.</h1>
+        <p class="lead">The Reconciliation Guardian cross-checks every transaction against <strong>PayMe</strong> and alerts you in WhatsApp before money slips away.</p>
+        <div class="cta">
+          <a href="#register" class="btn">Register &amp; Connect WhatsApp</a>
+          <a href="#how" class="pill">How it works</a>
+        </div>
+      </div>
+      <div class="card">
+        <div class="caps">WhatsApp preview</div>
+        <div class="spacer"></div>
+        <div class="benefit">
+          <h4>⚠️ Alert</h4>
+          <div class="muted small">Order #10428 — Payment <b>Failed</b> on PayMe, marked <b>Paid</b> on Wix. Do not ship yet.</div>
+        </div>
+        <div class="spacer"></div>
+        <div class="benefit">
+          <h4>✅ Resolved</h4>
+          <div class="muted small">Status corrected. You’re safe to fulfill now.</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Pain → Solution -->
+    <section class="kvs card">
+      <div class="problem">
+        <h2>When systems disagree, you pay the price.</h2>
+        <p>Your store marks an order <b>Paid</b>, but PayMe returns <b>Failed</b>. You ship the product; the payment never arrives.</p>
+      </div>
+      <div class="solution">
+        <h2>The Guardian stops that — automatically.</h2>
+        <ul class="clean">
+          <li>Detects platform vs. PayMe status mismatches in real time</li>
+          <li>Sends instant WhatsApp alerts before fulfillment</li>
+          <li>Eliminates preventable financial loss</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section id="how" class="how-steps card">
+      <h2>Simple setup. Instant protection.</h2>
+      <ol>
+        <li><b>Connect your store to PayMe</b> — via PayMe API / connector</li>
+        <li><b>Guardian monitors transactions</b> 24/7 using PayMe’s first-party data</li>
+        <li><b>Get alerts & a daily summary</b> in WhatsApp (optional email)</li>
+      </ol>
+      <p class="muted small">For this demo you don’t need a full integration — just follow the steps in the top strip.</p>
+    </section>
+
+    <!-- Benefits -->
+    <section class="grid-3">
+      <div class="benefit">
+        <h4>💰 Loss Prevention</h4>
+        <p class="muted">Stop unpaid shipments with automated validation before fulfillment.</p>
+      </div>
+      <div class="benefit">
+        <h4>⚡ Real-time Alerts</h4>
+        <p class="muted">WhatsApp notifications within seconds of a mismatch.</p>
+      </div>
+      <div class="benefit">
+        <h4>🔍 Source of Truth</h4>
+        <p class="muted">PayMe status is definitive — no more blame game between systems.</p>
+      </div>
+    </section>
+
+    <!-- Registration + QR -->
+    <section id="register" class="form-wrap">
+      <div class="card">
+        <h2>Try the Guardian demo now</h2>
+        <p class="muted">Fill the form so the bot can recognize your company and contact details, then open the bot on WhatsApp to start the 24-hour demo.</p>
+
+        <form id="rg-form" novalidate>
+          <!-- honeypot -->
+          <input type="text" name="company_site" autocomplete="off" style="position:absolute;left:-9999px;top:-9999px" tabindex="-1" aria-hidden="true">
+
+          <label for="companyName">Company Name *</label>
+          <input id="companyName" name="companyName" placeholder="Acme Ltd" required>
+
+          <div class="row">
+            <div>
+              <label for="fullName">Full Name *</label>
+              <input id="fullName" name="fullName" placeholder="Dana Cohen" required>
+            </div>
+            <div>
+              <label for="phone">Phone Number *</label>
+              <input id="phone" name="phone" placeholder="+972 50 000 0000" required>
+            </div>
+          </div>
+
+          <label for="email">Business Email *</label>
+          <input id="email" name="email" type="email" placeholder="you@company.com" required>
+
+          <div class="spacer"></div>
+          <button class="btn" id="submitBtn" type="submit">Register &amp; Connect WhatsApp</button>
+          <div class="help">After you register, open the bot: scan the QR or tap the link below. In WhatsApp, send <span class="mono">start</span> to activate (24h), then send <span class="mono">orders</span> to create 10 test orders.</div>
+        </form>
+      </div>
+
+      <div class="card qr-card">
+        <div class="caps">Open WhatsApp Bot</div>
+        <div id="qr" class="qr-code" aria-label="QR to open WhatsApp bot"></div>
+        <a id="waLink" class="pill" target="_blank" rel="noopener">Open WhatsApp Bot →</a>
+        <div class="help">Scan the QR or click the link. Demo mode only — no real payments or shipments are triggered.</div>
+
+        <div class="spacer"></div>
+        <div class="small muted">
+          <b>Quick commands</b>: Send <span class="mono">start</span> to activate demo (24h). Send <span class="mono">orders</span> to create 10 test orders. You’ll receive alerts when Platform Paid ≠ PayMe Failed.
+        </div>
+      </div>
+    </section>
+
+    <!-- Trust & Security -->
+    <section class="card">
+      <h2>Security first. Always.</h2>
+      <ul class="clean">
+        <li>Uses <b>PayMe</b> first-party data to validate payment status</li>
+        <li>No card data stored; no third-party data sharing</li>
+        <li>Works via secure PayMe APIs and webhooks</li>
+      </ul>
+      <p class="muted small">Supported today (demo focus): <b>Shopify</b>, <b>Wix</b>. Pilot candidates: <b>WooCommerce</b>, <b>Konimbo</b>.</p>
+    </section>
+  </main>
+
+  <footer class="container">
+    <div class="grid-2">
+      <div>
+        <div class="muted small">© 2025 Reconciliation Guardian — Demo for PayMe</div>
+      </div>
+      <div class="muted small" style="text-align:right">
+        <a href="#" onclick="alert('Add your Privacy Policy URL');return false;">Privacy</a> ·
+        <a href="#" onclick="alert('Add your Terms URL');return false;">Terms</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"><div id="toastText">Saved.</div></div>
+
+  <!-- Minimal QR generator (qrcode.js, MIT) embedded -->
+  <script>
+/*! QRCode for JavaScript (minimal build) - MIT */
+(function(){function l(a,b){this._el=a;this._htOption=b}function m(a,b){if("string"==typeof a){a=document.getElementById(a);if(!a)throw"qrcode: element not found";}this._el=a;this._o=b||{};this._o.text=b.text||"";this._o.width=b.width||200;this._o.height=b.height||200;this._o.correctLevel=0;this.makeCode(this._o.text)}m.prototype.makeCode=function(a){this._o.text=a;this.clear();var b=document.createElement("img");b.alt="QR";b.width=this._o.width;b.height=this._o.height;b.src="https://api.qrserver.com/v1/create-qr-code/?size="+this._o.width+"x"+this._o.height+"&data="+encodeURIComponent(a);this._el.appendChild(b)};m.prototype.clear=function(){for(;this._el.hasChildNodes();)this._el.removeChild(this._el.lastChild)};window.QRCode=m})();
+  </script>
+
+  <script>
+    // === CONFIG ===
+    const WEBHOOK_URL = "WEBHOOK_URL_HERE";            // <-- replace with your n8n webhook
+    const USE_AUTH_HEADER = true;                      // set false if not needed
+    const AUTH_HEADER_NAME = "x-api-key";              // adjust/remove if not used
+    const AUTH_HEADER_VALUE = "X_API_KEY_HERE";        // replace or leave empty
+    const WA_LINK = "https://wa.me/972500000000?text=start"; // <-- replace with your bot link
+
+    // Set WhatsApp link + QR
+    const waA = document.getElementById('waLink');
+    waA.href = WA_LINK;
+    new QRCode(document.getElementById("qr"), { text: WA_LINK, width: 200, height: 200 });
+
+    // Toast helper
+    const toast = document.getElementById('toast');
+    const toastText = document.getElementById('toastText');
+    function showToast(text, isErr=false){
+      toastText.textContent = text;
+      toast.className = "toast" + (isErr ? " err" : "");
+      toast.style.display = "block";
+      setTimeout(()=>toast.style.display="none", 4200);
+    }
+
+    // Form handling
+    const form = document.getElementById('rg-form');
+    const btn = document.getElementById('submitBtn');
+
+    form.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+
+      // Basic validation
+      const companyName = document.getElementById('companyName').value.trim();
+      const fullName = document.getElementById('fullName').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const honeypot = form.querySelector('input[name="company_site"]').value;
+
+      if(honeypot){ return; } // bots
+      if(!companyName || !fullName || !email || !phone){
+        showToast("Please complete all required fields.", true);
+        return;
+      }
+      const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      if(!emailOk){ showToast("Please enter a valid email.", true); return; }
+
+      // Build payload (adjust keys if your Airtable fields differ)
+      const payload = {
+        companyName, fullName, email, phone,
+        source: "rg-landing-demo",
+        ts: new Date().toISOString()
+      };
+
+      btn.disabled = true; btn.textContent = "Submitting…";
+
+      try{
+        const headers = { "Content-Type": "application/json" };
+        if(USE_AUTH_HEADER && AUTH_HEADER_VALUE){ headers[AUTH_HEADER_NAME] = AUTH_HEADER_VALUE; }
+
+        const res = await fetch(WEBHOOK_URL, {
+          method: "POST",
+          headers,
+          body: JSON.stringify(payload)
+        });
+
+        if(!res.ok){ throw new Error("Webhook error: " + res.status); }
+
+        // Optional: check JSON response
+        // const data = await res.json();
+
+        showToast("You’re registered. Open the WhatsApp bot to start the 24h demo.");
+        btn.textContent = "Registered ✓";
+        // Smooth scroll to QR
+        document.getElementById('waLink').scrollIntoView({behavior:"smooth"});
+      }catch(err){
+        console.error(err);
+        showToast("Submit failed. Please try again or contact support.", true);
+        btn.disabled = false; btn.textContent = "Register & Connect WhatsApp";
+      }
+    });
+  </script>
+</body>
+</html>
