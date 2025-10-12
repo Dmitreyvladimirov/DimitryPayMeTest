@@ -63,8 +63,8 @@
     .form-wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
     @media(max-width:900px){.form-wrap{grid-template-columns:1fr}}
     form label{display:block;font-size:13px;color:#cbd5e1;margin:10px 0 6px}
-    form input{width:100%;padding:12px 12px;border:1px solid #26314f;border-radius:12px;background:#0b1224;color:#e5e7eb;outline:none}
-    form input:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.2)}
+    form input, form select{width:100%;padding:12px 12px;border:1px solid #26314f;border-radius:12px;background:#0b1224;color:#e5e7eb;outline:none}
+    form input:focus, form select:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.2)}
     .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     .help{font-size:12px;color:#93a3b8;margin-top:8px}
     .qr-card{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:22px}
@@ -74,7 +74,7 @@
 
     /* validation UI */
     .field-error{color:#ef4444;font-size:12px;margin-top:6px}
-    input.input-error{border-color:#ef4444 !important; box-shadow:0 0 0 3px rgba(239,68,68,.2) !important}
+    input.input-error, select.input-error{border-color:#ef4444 !important; box-shadow:0 0 0 3px rgba(239,68,68,.2) !important}
     .inline-steps{display:flex;gap:12px;flex-wrap:wrap}
     .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;color:#cbd5e1;background:#0b1224;border:1px solid #1f2a44;padding:2px 6px;border-radius:6px}
   </style>
@@ -188,19 +188,34 @@
               <input id="name" name="name" placeholder="Dana Cohen" required>
             </div>
             <div>
-              <label for="whatsapp">WhatsApp *</label>
-              <input id="whatsapp"
-                     name="whatsapp"
-                     placeholder="+972 50 000 0000"
-                     required
-                     pattern="^(?:\\+972|0)5\\d[-\\s]?\\d{3}[-\\s]?\\d{4}$"
-                     title="Use +9725XXXXXXXX or 05XXXXXXXX (spaces/dashes allowed)">
+              <label for="email">Business Email *</label>
+              <input id="email" name="email" type="email" placeholder="you@company.com" required>
+            </div>
+          </div>
+
+          <div class="row">
+            <div>
+              <label for="country">Country *</label>
+              <select id="country" name="country" required>
+                <option value="IL" selected>🇮🇱 Israel (+972)</option>
+                <option value="US">🇺🇸 United States (+1)</option>
+                <option value="GB">🇬🇧 United Kingdom (+44)</option>
+                <option value="DE">🇩🇪 Germany (+49)</option>
+                <option value="FR">🇫🇷 France (+33)</option>
+                <option value="NL">🇳🇱 Netherlands (+31)</option>
+                <option value="UA">🇺🇦 Ukraine (+380)</option>
+                <option value="RU">🇷🇺 Russia (+7)</option>
+              </select>
+            </div>
+            <div>
+              <label for="localPhone">WhatsApp (local format) *</label>
+              <input id="localPhone" name="localPhone" placeholder="For IL: 05XXXXXXXX" required>
               <div id="err-whatsapp" class="field-error"></div>
             </div>
           </div>
 
-          <label for="email">Business Email *</label>
-          <input id="email" name="email" type="email" placeholder="you@company.com" required>
+          <!-- hidden E.164 to send -->
+          <input type="hidden" id="whatsapp" name="whatsapp">
 
           <div style="height:8px"></div>
           <button class="btn" id="submitBtn" type="submit">Register &amp; Connect WhatsApp</button>
@@ -245,9 +260,9 @@
   </footer>
 
   <script>
-    // ===== CONFIG (matches your old backend) =====
-    const REGISTER_URL = "https://dmitreyvladimirovic.app.n8n.cloud/webhook/rg/register"; // x-www-form-urlencoded
-    const WA_LINK = "https://wa.me/14155238886?text=join%20south-public"; // activation phrase
+    // ===== CONFIG =====
+    const REGISTER_URL = "https://dmitreyvladimirovic.app.n8n.cloud/webhook/rg/register";
+    const WA_LINK = "https://wa.me/14155238886?text=join%20south-public";
 
     // ===== Analytics helper (works even without GA) =====
     window.dataLayer = window.dataLayer || [];
@@ -257,72 +272,99 @@
       console.log('[track]', event, params);
     }
 
-    // ===== QR + link =====
+    // ===== Country dictionary (dial/trunk/length/sample) =====
+    const COUNTRIES = {
+      IL: { dial: '972', trunk: '0', sample: '05XXXXXXXX', min: 8,  max: 10 },
+      US: { dial: '1',   trunk: '',  sample: '2015550123', min: 10, max: 10 },
+      GB: { dial: '44',  trunk: '0', sample: '07123456789',min: 9,  max: 10 },
+      DE: { dial: '49',  trunk: '0', sample: '015123456789',min:10, max: 13 },
+      FR: { dial: '33',  trunk: '0', sample: '0612345678', min: 9,  max: 9  },
+      NL: { dial: '31',  trunk: '0', sample: '0612345678', min: 9,  max: 9  },
+      UA: { dial: '380', trunk: '0', sample: '0501234567', min: 9,  max: 9  },
+      RU: { dial: '7',   trunk: '8', sample: '9123456789', min: 10, max: 10 }
+    };
+
+    // ===== DOM =====
+    const form       = document.getElementById('rg-form');
+    const btn        = document.getElementById('submitBtn');
+    const statusEl   = document.getElementById('status');
+    const waLink     = document.getElementById('waLink');
+    const qrImg      = document.getElementById('qr');
+
+    const countrySel = document.getElementById('country');
+    const localPhone = document.getElementById('localPhone');
+    const hiddenWA   = document.getElementById('whatsapp');
+    const waErrEl    = document.getElementById('err-whatsapp');
+
+    // ===== Helpers =====
+    function onlyDigits(v){ return (v||'').replace(/\D/g,''); }
+    function validEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||'').trim()); }
+    function clearPhoneError(){ waErrEl.textContent=''; localPhone.classList.remove('input-error'); countrySel.classList.remove('input-error'); }
+    function showPhoneError(msg){ waErrEl.textContent = msg; localPhone.classList.add('input-error'); }
+
+    // Build E.164 from country + national number
+    function buildE164(countryCode, nationalRaw){
+      const cfg = COUNTRIES[countryCode];
+      if (!cfg) return { ok:false, reason: 'Unsupported country' };
+
+      let nsn = onlyDigits(nationalRaw);
+      if (!nsn) return { ok:false, reason:'Empty number' };
+
+      if (cfg.trunk && nsn.startsWith(cfg.trunk)) nsn = nsn.slice(cfg.trunk.length);
+
+      if (cfg.min && nsn.length < cfg.min) return { ok:false, reason:`Too short for ${countryCode}` };
+      if (cfg.max && nsn.length > cfg.max) return { ok:false, reason:`Too long for ${countryCode}` };
+
+      const e164 = `+${cfg.dial}${nsn}`;
+      if (!/^\+[1-9]\d{7,14}$/.test(e164)) return { ok:false, reason:'Invalid E.164' };
+
+      return { ok:true, e164 };
+    }
+
+    // Update placeholder by country
+    function updatePlaceholder(){
+      const cfg = COUNTRIES[countrySel.value] || {};
+      localPhone.placeholder = cfg.sample ? `For ${countrySel.value}: ${cfg.sample}` : 'Local number';
+    }
+    countrySel.addEventListener('change', ()=>{ updatePlaceholder(); clearPhoneError(); });
+    updatePlaceholder();
+
+    // Validate on blur
+    localPhone.addEventListener('blur', ()=>{
+      clearPhoneError();
+      const r = buildE164(countrySel.value, localPhone.value);
+      if (!r.ok){
+        const cfg = COUNTRIES[countrySel.value];
+        const sample = cfg?.sample ? ` Example: ${cfg.sample}` : '';
+        showPhoneError(`Enter a valid local number.${sample}`);
+      }
+    });
+
+    // QR + link + analytics
     document.addEventListener('DOMContentLoaded', function(){
-      const qrImg = document.getElementById('qr');
-      const waA = document.getElementById('waLink');
-      waA.href = WA_LINK;
+      waLink.href = WA_LINK;
       qrImg.src = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + encodeURIComponent(WA_LINK);
       track('qr_rendered', { page: 'paymetest_final' });
     });
-
-    // WhatsApp click tracking
     document.addEventListener('click', function(e){
       const a = e.target.closest('a');
       if (a && a.id === 'waLink') track('whatsapp_click', { href: a.href });
     });
 
-    // ===== Form handling (x-www-form-urlencoded + same field names) =====
-    const form = document.getElementById('rg-form');
-    const btn  = document.getElementById('submitBtn');
-    const statusEl = document.getElementById('status');
-    const waErrEl = document.getElementById('err-whatsapp');
-    const waInput = document.getElementById('whatsapp');
-
-    function validEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||'').trim()); }
-
-    // Normalize & validate IL numbers: +9725XXXXXXXX or 05XXXXXXXX (spaces/dashes allowed)
-    function parseILPhone(v){
-      const digits = String(v||'').replace(/\D/g,''); // keep digits only
-      if (digits.length === 12 && digits.startsWith('9725')) {
-        return { ok:true, e164:'+' + digits };
-      }
-      if (digits.length === 10 && digits.startsWith('05')) {
-        return { ok:true, e164:'+972' + digits.slice(1) };
-      }
-      return { ok:false };
-    }
-
-    function showPhoneError(msg){
-      waErrEl.textContent = msg;
-      waInput.classList.add('input-error');
-    }
-    function clearPhoneError(){
-      waErrEl.textContent = '';
-      waInput.classList.remove('input-error');
-    }
-
-    // Validate on blur for better UX
-    waInput.addEventListener('blur', ()=>{
-      const r = parseILPhone(waInput.value);
-      if (!r.ok) showPhoneError('Use +9725XXXXXXXX or 05XXXXXXXX (spaces/dashes allowed).');
-      else clearPhoneError();
-    });
-
+    // Submit form → send x-www-form-urlencoded
     form.addEventListener('submit', async (e)=>{
       e.preventDefault();
       statusEl.textContent = '';
       clearPhoneError();
 
-      const fd = new FormData(form);
-      if (fd.get('website')) return; // honeypot
+      const hp = form.querySelector('input[name="website"]').value;
+      if (hp) return; // honeypot
 
-      const company  = (fd.get('company')  || '').trim();
-      const name     = (fd.get('name')     || '').trim();
-      const email    = (fd.get('email')    || '').trim();
-      const whatsapp = (fd.get('whatsapp') || '').trim();
+      const company = (document.getElementById('company').value||'').trim();
+      const name    = (document.getElementById('name').value||'').trim();
+      const email   = (document.getElementById('email').value||'').trim();
 
-      if (!company || !name || !email || !whatsapp){
+      if (!company || !name || !email || !localPhone.value.trim()){
         statusEl.textContent = 'Please complete all required fields.';
         return;
       }
@@ -331,44 +373,47 @@
         return;
       }
 
-      const phone = parseILPhone(whatsapp);
-      if (!phone.ok){
-        showPhoneError('Use +9725XXXXXXXX or 05XXXXXXXX (spaces/dashes allowed).');
+      const r = buildE164(countrySel.value, localPhone.value);
+      if (!r.ok){
+        const cfg = COUNTRIES[countrySel.value];
+        const sample = cfg?.sample ? ` Example: ${cfg.sample}` : '';
+        showPhoneError(`Enter a valid local number.${sample}`);
         statusEl.textContent = 'Please correct the WhatsApp number.';
         return;
       }
+      hiddenWA.value = r.e164;
 
       const body = new URLSearchParams({
         company,
         name,
         email,
-        whatsapp: phone.e164 // normalized E.164
+        whatsapp: hiddenWA.value
       }).toString();
 
       btn.disabled = true; btn.textContent = 'Submitting…';
 
       try{
-        const res = await fetch(REGISTER_URL, {
+        const resp = await fetch(REGISTER_URL, {
           method:'POST',
-          headers:{ 'Content-Type':'application/x-www-form-urlencoded' },
+          headers:{'Content-Type':'application/x-www-form-urlencoded'},
           body
         });
-        let j={}; try{ j = await res.json(); }catch{}
+        let j={}; try{ j = await resp.json(); }catch{}
 
-        if (res.ok){
+        if (resp.ok){
           statusEl.textContent = 'You’re registered. Open the WhatsApp bot to start the 24h demo.';
           track('form_submit', { form:'rg_register', status:'ok' });
           btn.textContent = 'Registered ✓';
           document.getElementById('waLink').scrollIntoView({behavior:'smooth'});
         } else {
-          statusEl.textContent = 'Registration error: ' + (j.error || res.status);
-          track('form_submit', { form:'rg_register', status:'error', code:res.status });
-          btn.disabled = false; btn.textContent = 'Register & Connect WhatsApp';
+          statusEl.textContent = 'Registration error: ' + (j.error || resp.status);
+          track('form_submit', { form:'rg_register', status:'error', code:resp.status });
+          btn.disabled=false; btn.textContent='Register & Connect WhatsApp';
         }
       }catch(err){
         statusEl.textContent = 'Network error: ' + err;
         track('form_submit', { form:'rg_register', status:'network_error' });
-        btn.disabled = false; btn.textContent = 'Register & Connect WhatsApp';
+        btn.disabled=false; btn.textContent='Register & Connect WhatsApp';
       }
     });
   </script>
