@@ -4,17 +4,14 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
 
-  <!-- Title & meta -->
   <title>Reconciliation Guardian — PayMe Demo</title>
   <meta name="description" content="Prevent shipping unpaid orders. WhatsApp bot cross-checks PayMe vs platform in real time. Register, open WhatsApp, and get instant mismatch alerts.">
 
-  <!-- Favicon (JPEG from repo root) -->
+  <!-- Favicon / OG (uses PayMe.jpeg in repo root) -->
   <link rel="icon" href="./PayMe.jpeg" type="image/jpeg">
   <link rel="shortcut icon" href="./PayMe.jpeg" type="image/jpeg">
   <link rel="apple-touch-icon" href="./PayMe.jpeg">
   <meta name="theme-color" content="#0f172a">
-
-  <!-- Open Graph / Twitter previews -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="Reconciliation Guardian — PayMe Demo">
   <meta property="og:description" content="Real-time WhatsApp alerts when PayMe and your platform disagree. Register, join WhatsApp, and see it in action.">
@@ -26,10 +23,7 @@
   <meta name="twitter:image" content="https://dmitreyvladimirov.github.io/DimitryPayMeTest/PayMe.jpeg">
 
   <style>
-    :root{
-      --bg:#0f172a;--card:#111827;--muted:#94a3b8;--text:#e2e8f0;--brand:#22d3ee;--brand-2:#38bdf8;--ok:#10b981;--err:#ef4444;
-      --radius:16px;--shadow:0 10px 30px rgba(0,0,0,.35)
-    }
+    :root{--bg:#0f172a;--card:#111827;--muted:#94a3b8;--text:#e2e8f0;--brand:#22d3ee;--brand-2:#38bdf8;--ok:#10b981;--err:#ef4444;--radius:16px;--shadow:0 10px 30px rgba(0,0,0,.35)}
     *{box-sizing:border-box}
     html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
     a{color:var(--brand-2);text-decoration:none} a:hover{text-decoration:underline}
@@ -37,7 +31,6 @@
     .banner{background:linear-gradient(90deg,#0ea5e9,#22d3ee);color:#003044;text-align:center;padding:10px 14px;font-weight:700}
     .strip{background:#0b1224;border-bottom:1px solid #1f2a44}
     .strip .container{display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center;font-size:14px;color:var(--muted)}
-    .strip strong{color:#c7d2fe}
     header{padding:56px 0 24px}
     .hero{display:grid;grid-template-columns:1.2fr .8fr;gap:28px}
     @media(max-width:900px){.hero{grid-template-columns:1fr}}
@@ -71,7 +64,6 @@
     .caps{font-size:12px;letter-spacing:.08em;color:#9ca3af;text-transform:uppercase}
     footer{padding:28px 0 40px;color:#9aa5b1}
     .small{font-size:12px}
-
     /* validation UI */
     .field-error{color:#ef4444;font-size:12px;margin-top:6px}
     input.input-error, select.input-error{border-color:#ef4444 !important; box-shadow:0 0 0 3px rgba(239,68,68,.2) !important}
@@ -155,18 +147,9 @@
 
     <!-- Benefits -->
     <section class="grid-3">
-      <div class="card">
-        <h4>💰 Loss Prevention</h4>
-        <p class="help">Stop unpaid shipments with automated validation before fulfillment.</p>
-      </div>
-      <div class="card">
-        <h4>⚡ Real-time Alerts</h4>
-        <p class="help">WhatsApp notifications within seconds of a mismatch.</p>
-      </div>
-      <div class="card">
-        <h4>🔍 Source of Truth</h4>
-        <p class="help">PayMe status is definitive — no more blame game between systems.</p>
-      </div>
+      <div class="card"><h4>💰 Loss Prevention</h4><p class="help">Stop unpaid shipments with automated validation before fulfillment.</p></div>
+      <div class="card"><h4>⚡ Real-time Alerts</h4><p class="help">WhatsApp notifications within seconds of a mismatch.</p></div>
+      <div class="card"><h4>🔍 Source of Truth</h4><p class="help">PayMe status is definitive — no more blame game between systems.</p></div>
     </section>
 
     <!-- Registration + QR -->
@@ -198,18 +181,18 @@
               <label for="country">Country *</label>
               <select id="country" name="country" required>
                 <option value="IL" selected>🇮🇱 Israel (+972)</option>
+                <option value="RU">🇷🇺 Russia (+7)</option>
                 <option value="US">🇺🇸 United States (+1)</option>
                 <option value="GB">🇬🇧 United Kingdom (+44)</option>
                 <option value="DE">🇩🇪 Germany (+49)</option>
                 <option value="FR">🇫🇷 France (+33)</option>
                 <option value="NL">🇳🇱 Netherlands (+31)</option>
                 <option value="UA">🇺🇦 Ukraine (+380)</option>
-                <option value="RU">🇷🇺 Russia (+7)</option>
               </select>
             </div>
             <div>
               <label for="localPhone">WhatsApp (local format) *</label>
-              <input id="localPhone" name="localPhone" placeholder="For IL: 05XXXXXXXX" required>
+              <input id="localPhone" name="localPhone" inputmode="tel" placeholder="For IL: 5XXXXXXXX" required>
               <div id="err-whatsapp" class="field-error"></div>
             </div>
           </div>
@@ -229,11 +212,8 @@
         <img id="qr" alt="Scan to open WhatsApp bot" width="200" height="200" style="margin:10px 0;border:1px dashed #26314f;border-radius:12px;background:#0b1224" />
         <a id="waLink" class="pill" target="_blank" rel="noopener">Open WhatsApp Bot →</a>
         <div class="help">Scan the QR or click the link. Demo mode only — no real payments or shipments are triggered.</div>
-
         <div style="height:8px"></div>
-        <div class="small">
-          <b>Quick commands</b>: the chat opens with <span class="mono">join south-public</span>. After activation, you’ll receive alerts when Platform Paid ≠ PayMe Failed.
-        </div>
+        <div class="small"><b>Quick commands</b>: the chat opens with <span class="mono">join south-public</span>. After activation, you’ll receive alerts when Platform Paid ≠ PayMe Failed.</div>
       </div>
     </section>
 
@@ -264,7 +244,7 @@
     const REGISTER_URL = "https://dmitreyvladimirovic.app.n8n.cloud/webhook/rg/register";
     const WA_LINK = "https://wa.me/14155238886?text=join%20south-public";
 
-    // ===== Analytics helper (works even without GA) =====
+    // ===== Analytics helper =====
     window.dataLayer = window.dataLayer || [];
     function track(event, params = {}) {
       if (window.gtag) gtag('event', event, params);
@@ -272,16 +252,24 @@
       console.log('[track]', event, params);
     }
 
-    // ===== Country dictionary (dial/trunk/length/sample) =====
+    // ===== Country rules: NSN without trunk (user enters NSN, we strip trunk if typed) =====
     const COUNTRIES = {
-      IL: { dial: '972', trunk: '0', sample: '05XXXXXXXX',    min: 8,  max: 10 },
-      US: { dial: '1',   trunk: '',  sample: '2015550123',    min: 10, max: 10 },
-      GB: { dial: '44',  trunk: '0', sample: '07123456789',   min: 9,  max: 10 },
-      DE: { dial: '49',  trunk: '0', sample: '015123456789',  min: 10, max: 13 },
-      FR: { dial: '33',  trunk: '0', sample: '0612345678',    min: 9,  max: 9  },
-      NL: { dial: '31',  trunk: '0', sample: '0612345678',    min: 9,  max: 9  },
-      UA: { dial: '380', trunk: '0', sample: '0501234567',    min: 9,  max: 9  },
-      RU: { dial: '7',   trunk: '8', sample: '9123456789',    min: 10, max: 10 }
+      // Israel: user enters 9 digits, starts with 5; if '05...' typed, strip 0
+      IL: { dial:'972', trunk:'0', nsn:[9,9],  localRegex:/^5\d{8}$/,             sample:'5XXXXXXXX',                 hint:'Starts with 5, 9 digits' },
+      // Russia: user enters 10 digits, starts with 9; if '89...' typed, strip 8
+      RU: { dial:'7',   trunk:'8', nsn:[10,10],localRegex:/^9\d{9}$/,            sample:'9XXXXXXXXX',                hint:'Starts with 9, 10 digits' },
+      // USA (NANP): 10 digits; area and central office cannot start with 0/1
+      US: { dial:'1',   trunk:'',  nsn:[10,10],localRegex:/^(?:[2-9]\d{2})(?:[2-9]\d{2})\d{4}$/, sample:'2025550123', hint:'10 digits; area/office not 0/1' },
+      // UK mobiles: 10 digits, start with 7; if '07...' typed, strip 0
+      GB: { dial:'44',  trunk:'0', nsn:[10,10],localRegex:/^7\d{9}$/,            sample:'7XXXXXXXXX',                hint:'Starts with 7, 10 digits' },
+      // Germany mobiles: start 15/16/17, 10–11 digits; if '0...' typed, strip 0
+      DE: { dial:'49',  trunk:'0', nsn:[10,11],localRegex:/^(?:15|16|17)\d{8,9}$/,sample:'15XXXXXXXXX',               hint:'Starts with 15/16/17, 10–11 digits' },
+      // France mobiles: start 6 or 7, 9 digits; if '06/07...', strip 0
+      FR: { dial:'33',  trunk:'0', nsn:[9,9],  localRegex:/^(?:6|7)\d{8}$/,       sample:'6XXXXXXXX or 7XXXXXXXX',    hint:'Starts with 6 or 7, 9 digits' },
+      // Netherlands mobiles: start 6, 9 digits; if '06...', strip 0
+      NL: { dial:'31',  trunk:'0', nsn:[9,9],  localRegex:/^6\d{8}$/,             sample:'6XXXXXXXX',                 hint:'Starts with 6, 9 digits' },
+      // Ukraine: 9 digits; allow common mobile prefixes (simplified: first digit 3–9)
+      UA: { dial:'380', trunk:'0', nsn:[9,9],  localRegex:/^[3-9]\d{8}$/,         sample:'50XXXXXXX',                 hint:'9 digits; starts 3–9' }
     };
 
     // ===== DOM =====
@@ -297,87 +285,98 @@
     const waErrEl    = document.getElementById('err-whatsapp');
 
     // ===== Helpers =====
-    function onlyDigits(v){ return (v||'').replace(/\D/g,''); }
+    function digitsOnly(s){ return String(s||'').replace(/\D/g,''); }
     function validEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||'').trim()); }
-    function clearPhoneError(){ waErrEl.textContent=''; localPhone.classList.remove('input-error'); countrySel.classList.remove('input-error'); }
-    function showPhoneError(msg){ waErrEl.textContent = msg; localPhone.classList.add('input-error'); }
-
-    // Build E.164 from country + national number
-    function buildE164(countryCode, nationalRaw){
-      const cfg = COUNTRIES[countryCode];
-      if (!cfg) return { ok:false, reason: 'Unsupported country' };
-
-      let nsn = onlyDigits(nationalRaw);
-      if (!nsn) return { ok:false, reason:'Empty number' };
-
-      if (cfg.trunk && nsn.startsWith(cfg.trunk)) nsn = nsn.slice(cfg.trunk.length);
-
-      if (cfg.min && nsn.length < cfg.min) return { ok:false, reason:`Too short for ${countryCode}` };
-      if (cfg.max && nsn.length > cfg.max) return { ok:false, reason:`Too long for ${countryCode}` };
-
-      const e164 = `+${cfg.dial}${nsn}`;
-      if (!/^\+[1-9]\d{7,14}$/.test(e164)) return { ok:false, reason:'Invalid E.164' };
-
-      return { ok:true, e164 };
+    function clearPhoneError(){ waErrEl.textContent=''; localPhone.classList.remove('input-error'); }
+    function showPhoneError(cc){
+      const cfg = COUNTRIES[cc] || {};
+      const msg = cfg.hint || (cfg.sample ? `Format: ${cfg.sample}` : 'Invalid number');
+      waErrEl.textContent = `Invalid number. ${msg}.`;
+      localPhone.classList.add('input-error');
     }
 
-    // Update placeholder by country
-    function updatePlaceholder(){
-      const cfg = COUNTRIES[countrySel.value] || {};
-      localPhone.placeholder = cfg.sample ? `For ${countrySel.value}: ${cfg.sample}` : 'Local number';
+    // Placeholder & maxlength derived from sample (+1 to allow accidental trunk; we'll strip it)
+    function setLocalConstraints(){
+      const cc  = countrySel.value;
+      const cfg = COUNTRIES[cc] || {};
+      localPhone.placeholder = cfg.sample ? `For ${cc}: ${cfg.sample}` : 'Local number';
+      const baseLen = cfg.sample ? digitsOnly(cfg.sample).length : (cfg.nsn?.[1] || 15);
+      localPhone.maxLength   = baseLen + (cfg.trunk ? 1 : 0);
+      clearPhoneError();
     }
-    countrySel.addEventListener('change', ()=>{ updatePlaceholder(); clearPhoneError(); });
-    updatePlaceholder();
+
+    // Numeric-only & enforce max length while typing
+    localPhone.addEventListener('input', ()=>{
+      const cc  = countrySel.value;
+      const cfg = COUNTRIES[cc] || {};
+      const baseLen = cfg.sample ? digitsOnly(cfg.sample).length : (cfg.nsn?.[1] || 15);
+      const max = baseLen + (cfg.trunk ? 1 : 0);
+      let d = digitsOnly(localPhone.value);
+      if (d.length > max) d = d.slice(0, max);
+      localPhone.value = d;
+    });
+
+    // Build E.164 from country + local NSN (strip trunk if typed)
+    function buildE164(cc, localRaw){
+      const cfg = COUNTRIES[cc]; if(!cfg) return {ok:false, reason:'country'};
+      let digits = digitsOnly(localRaw);
+      if (!digits) return {ok:false, reason:'empty'};
+      // strip trunk if present
+      if (cfg.trunk && digits.startsWith(cfg.trunk)) digits = digits.slice(cfg.trunk.length);
+      // strict local format per country
+      if (cfg.localRegex && !cfg.localRegex.test(digits)) return {ok:false, reason:'local-format'};
+      // NSN length range
+      const [min,max] = cfg.nsn || [8,15];
+      if (digits.length < min || digits.length > max) return {ok:false, reason:'length'};
+      // final E.164
+      const e164 = `+${cfg.dial}${digits}`;
+      if (!/^\+[1-9]\d{7,14}$/.test(e164)) return {ok:false, reason:'e164'};
+      return {ok:true, e164};
+    }
 
     // Validate on blur
     localPhone.addEventListener('blur', ()=>{
-      clearPhoneError();
-      const r = buildE164(countrySel.value, localPhone.value);
-      if (!r.ok){
-        const cfg = COUNTRIES[countrySel.value];
-        const sample = cfg?.sample ? ` Example: ${cfg.sample}` : '';
-        showPhoneError(`Enter a valid local number.${sample}`);
-      }
+      const r = buildE.164?.(countrySel.value, localPhone.value); // safety if cached older JS
+      const res = r || buildE164(countrySel.value, localPhone.value);
+      if (!res.ok) showPhoneError(countrySel.value); else clearPhoneError();
     });
 
-    // QR + link + analytics
-    document.addEventListener('DOMContentLoaded', function(){
+    // Init QR/link + analytics + constraints
+    document.addEventListener('DOMContentLoaded', ()=>{
       waLink.href = WA_LINK;
       qrImg.src = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + encodeURIComponent(WA_LINK);
       track('qr_rendered', { page: 'paymetest_final' });
+      setLocalConstraints();
     });
-    document.addEventListener('click', function(e){
+    countrySel.addEventListener('change', setLocalConstraints);
+    document.addEventListener('click', (e)=>{
       const a = e.target.closest('a');
       if (a && a.id === 'waLink') track('whatsapp_click', { href: a.href });
     });
 
-    // Submit form → send x-www-form-urlencoded
+    // ===== Form submit =====
     form.addEventListener('submit', async (e)=>{
       e.preventDefault();
-      statusEl.textContent = '';
+      statusEl.textContent='';
       clearPhoneError();
 
+      // honeypot
       const hp = form.querySelector('input[name="website"]').value;
-      if (hp) return; // honeypot
+      if (hp) return;
 
-      const company = (document.getElementById('company').value||'').trim();
-      const name    = (document.getElementById('name').value||'').trim();
-      const email   = (document.getElementById('email').value||'').trim();
-
+      const company=(document.getElementById('company').value||'').trim();
+      const name   =(document.getElementById('name').value||'').trim();
+      const email  =(document.getElementById('email').value||'').trim();
       if (!company || !name || !email || !localPhone.value.trim()){
-        statusEl.textContent = 'Please complete all required fields.';
-        return;
+        statusEl.textContent = 'Please complete all required fields.'; return;
       }
       if (!validEmail(email)){
-        statusEl.textContent = 'Please enter a valid email.';
-        return;
+        statusEl.textContent = 'Please enter a valid email.'; return;
       }
 
       const r = buildE164(countrySel.value, localPhone.value);
       if (!r.ok){
-        const cfg = COUNTRIES[countrySel.value];
-        const sample = cfg?.sample ? ` Example: ${cfg.sample}` : '';
-        showPhoneError(`Enter a valid local number.${sample}`);
+        showPhoneError(countrySel.value);
         statusEl.textContent = 'Please correct the WhatsApp number.';
         return;
       }
@@ -390,7 +389,6 @@
         whatsapp: hiddenWA.value
       }).toString();
 
-      const btn = document.getElementById('submitBtn');
       btn.disabled = true; btn.textContent = 'Submitting…';
 
       try{
@@ -400,7 +398,6 @@
           body
         });
         let j={}; try{ j = await resp.json(); }catch{}
-
         if (resp.ok){
           statusEl.textContent = 'You’re registered. Open the WhatsApp bot to start the 24h demo.';
           track('form_submit', { form:'rg_register', status:'ok' });
