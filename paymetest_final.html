@@ -36,8 +36,7 @@
     .container{max-width:1000px;margin:0 auto;padding:24px}
     .banner{background:linear-gradient(90deg,#0ea5e9,#22d3ee);color:#003044;text-align:center;padding:10px 14px;font-weight:700}
     .strip{background:#0b1224;border-bottom:1px solid #1f2a44}
-    .strip .container{display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center;font-size:14px;color:var(--muted)}
-    .strip strong{color:#c7d2fe}
+    .strip .container{display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center;font-size:14px;color:#b7c1d1}
     header{padding:56px 0 24px}
     .hero{display:grid;grid-template-columns:1.2fr .8fr;gap:28px}
     @media(max-width:900px){.hero{grid-template-columns:1fr}}
@@ -71,8 +70,6 @@
     .caps{font-size:12px;letter-spacing:.08em;color:#9ca3af;text-transform:uppercase}
     footer{padding:28px 0 40px;color:#9aa5b1}
     .small{font-size:12px}
-
-    /* validation UI */
     .field-error{color:#ef4444;font-size:12px;margin-top:6px}
     input.input-error{border-color:#ef4444 !important; box-shadow:0 0 0 3px rgba(239,68,68,.2) !important}
     .inline-steps{display:flex;gap:12px;flex-wrap:wrap}
@@ -146,8 +143,8 @@
     <section id="how" class="card">
       <h2>Simple setup. Instant protection.</h2>
       <ol style="margin:0 0 0 18px">
-        <li><b>Connect your store to PayMe</b> — via PayMe API / connector</li>
-        <li><b>Guardian monitors transactions</b> 24/7 using PayMe’s first-party data</li>
+        <li><b>Connect your store to PayMe</b> — via PayMe API / connector <b>(Demo simulated via Airtable)</b></li>
+        <li><b>Guardian monitors transactions</b> 24/7 using PayMe’s first-party data <b>(Demo simulated via Airtable)</b></li>
         <li><b>Get alerts & a daily summary</b> in WhatsApp (optional email)</li>
       </ol>
       <p class="help">For this demo you don’t need a full integration — just follow the steps in the top strip.</p>
@@ -221,17 +218,6 @@
         </div>
       </div>
     </section>
-
-    <!-- Trust & Security -->
-    <section class="card">
-      <h2>Security first. Always.</h2>
-      <ul class="clean">
-        <li>Uses <b>PayMe</b> first-party data to validate payment status</li>
-        <li>No card data stored; no third-party data sharing</li>
-        <li>Works via secure PayMe APIs and webhooks</li>
-      </ul>
-      <p class="help">Supported today (demo focus): <b>Shopify</b>, <b>Wix</b>. Pilot candidates: <b>WooCommerce</b>, <b>Konimbo</b>.</p>
-    </section>
   </main>
 
   <footer class="container">
@@ -283,7 +269,7 @@
 
     // Normalize & validate IL numbers: +9725XXXXXXXX or 05XXXXXXXX (spaces/dashes allowed)
     function parseILPhone(v){
-      const digits = String(v||'').replace(/\D/g,''); // keep digits only
+      const digits = String(v||'').replace(/\D/g,''); // digits only
       if (digits.length === 12 && digits.startsWith('9725')) {
         return { ok:true, e164:'+' + digits };
       }
