@@ -8,7 +8,7 @@
   <title>Reconciliation Guardian — PayMe Demo</title>
   <meta name="description" content="Prevent shipping unpaid orders. WhatsApp bot cross-checks PayMe vs platform in real time. Register, open WhatsApp, and get instant mismatch alerts.">
 
-  <!-- Favicon (quick JPEG variant from repo root) -->
+  <!-- Favicon (JPEG from repo root) -->
   <link rel="icon" href="./PayMe.jpeg" type="image/jpeg">
   <link rel="shortcut icon" href="./PayMe.jpeg" type="image/jpeg">
   <link rel="apple-touch-icon" href="./PayMe.jpeg">
@@ -27,7 +27,7 @@
 
   <style>
     :root{
-      --bg:#0f172a;--card:#111827;--muted:#94a3b8;--text:#e2e8f0;--brand:#22d3ee;--brand-2:#38bdf8;--ok:#10b981;--warn:#f59e0b;--err:#ef4444;
+      --bg:#0f172a;--card:#111827;--muted:#94a3b8;--text:#e2e8f0;--brand:#22d3ee;--brand-2:#38bdf8;--ok:#10b981;--err:#ef4444;
       --radius:16px;--shadow:0 10px 30px rgba(0,0,0,.35)
     }
     *{box-sizing:border-box}
@@ -59,7 +59,7 @@
     .kvs .solution{border-color:var(--ok)}
     ul.clean{list-style:none;padding:0;margin:10px 0 0}
     ul.clean li{margin:8px 0;padding-left:24px;position:relative}
-    ul.clean li:before{content:"•";position:absolute;left:0;color:var(--brand)}
+    ul.clean li:before{content:"•";position:absolute;left:0;color:#22d3ee}
     .form-wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
     @media(max-width:900px){.form-wrap{grid-template-columns:1fr}}
     form label{display:block;font-size:13px;color:#cbd5e1;margin:10px 0 6px}
@@ -274,14 +274,14 @@
 
     // ===== Country dictionary (dial/trunk/length/sample) =====
     const COUNTRIES = {
-      IL: { dial: '972', trunk: '0', sample: '05XXXXXXXX', min: 8,  max: 10 },
-      US: { dial: '1',   trunk: '',  sample: '2015550123', min: 10, max: 10 },
-      GB: { dial: '44',  trunk: '0', sample: '07123456789',min: 9,  max: 10 },
-      DE: { dial: '49',  trunk: '0', sample: '015123456789',min:10, max: 13 },
-      FR: { dial: '33',  trunk: '0', sample: '0612345678', min: 9,  max: 9  },
-      NL: { dial: '31',  trunk: '0', sample: '0612345678', min: 9,  max: 9  },
-      UA: { dial: '380', trunk: '0', sample: '0501234567', min: 9,  max: 9  },
-      RU: { dial: '7',   trunk: '8', sample: '9123456789', min: 10, max: 10 }
+      IL: { dial: '972', trunk: '0', sample: '05XXXXXXXX',    min: 8,  max: 10 },
+      US: { dial: '1',   trunk: '',  sample: '2015550123',    min: 10, max: 10 },
+      GB: { dial: '44',  trunk: '0', sample: '07123456789',   min: 9,  max: 10 },
+      DE: { dial: '49',  trunk: '0', sample: '015123456789',  min: 10, max: 13 },
+      FR: { dial: '33',  trunk: '0', sample: '0612345678',    min: 9,  max: 9  },
+      NL: { dial: '31',  trunk: '0', sample: '0612345678',    min: 9,  max: 9  },
+      UA: { dial: '380', trunk: '0', sample: '0501234567',    min: 9,  max: 9  },
+      RU: { dial: '7',   trunk: '8', sample: '9123456789',    min: 10, max: 10 }
     };
 
     // ===== DOM =====
@@ -390,6 +390,7 @@
         whatsapp: hiddenWA.value
       }).toString();
 
+      const btn = document.getElementById('submitBtn');
       btn.disabled = true; btn.textContent = 'Submitting…';
 
       try{
