@@ -35,8 +35,27 @@
     a{color:var(--brand-2);text-decoration:none} a:hover{text-decoration:underline}
     .container{max-width:1000px;margin:0 auto;padding:24px}
     .banner{background:linear-gradient(90deg,#0ea5e9,#22d3ee);color:#003044;text-align:center;padding:10px 14px;font-weight:700}
+
     .strip{background:#0b1224;border-bottom:1px solid #1f2a44}
-    .strip .container{display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center;font-size:14px;color:#b7c1d1}
+    .strip .container{display:flex;flex-direction:column;gap:12px;align-items:center;justify-content:center;color:#b7c1d1}
+
+    /* Inline steps with arrows between */
+    .steps{
+      display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:nowrap
+    }
+    .step{
+      display:inline-block;padding:8px 14px;border:1px solid #223051;border-radius:999px;background:#0b1224;color:#d1d5db;font-weight:600
+    }
+    .step:not(:last-child){position:relative;margin-right:28px}
+    .step:not(:last-child)::after{
+      content:"→";position:relative;left:14px;margin-left:14px;color:#9ab1d8;font-weight:700;opacity:.75
+    }
+    @media (max-width:640px){
+      .steps{flex-wrap:wrap;row-gap:10px}
+      .step:not(:last-child){margin-right:10px}
+      .step:not(:last-child)::after{display:none}
+    }
+
     header{padding:56px 0 24px}
     .hero{display:grid;grid-template-columns:1.2fr .8fr;gap:28px}
     @media(max-width:900px){.hero{grid-template-columns:1fr}}
@@ -72,7 +91,6 @@
     .small{font-size:12px}
     .field-error{color:#ef4444;font-size:12px;margin-top:6px}
     input.input-error{border-color:#ef4444 !important; box-shadow:0 0 0 3px rgba(239,68,68,.2) !important}
-    .inline-steps{display:flex;gap:12px;flex-wrap:wrap}
     .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;color:#cbd5e1;background:#0b1224;border:1px solid #1f2a44;padding:2px 6px;border-radius:6px}
   </style>
 </head>
@@ -84,12 +102,12 @@
   <!-- QUICK START STRIP -->
   <div class="strip">
     <div class="container">
-      <span class="caps">How to try it:</span>
-      <div class="inline-steps">
-        <span class="pill">Register</span>
-        <span class="pill">Open WhatsApp via <strong>QR / link</strong></span>
-        <span class="pill">Message <span class="mono">join south-public</span> (24h)</span>
-        <span class="pill">Get <strong>mismatch alerts</strong> (Platform Paid ≠ PayMe Failed)</span>
+      <span class="caps">HOW TO TRY IT:</span>
+      <div class="steps">
+        <span class="step">Register</span>
+        <span class="step">Open WhatsApp via <strong>QR / link</strong></span>
+        <span class="step">Message <span class="mono">join south-public</span> (24h)</span>
+        <span class="step">Get <strong>mismatch alerts</strong> (Platform Paid ≠ PayMe Failed)</span>
       </div>
     </div>
   </div>
@@ -173,7 +191,7 @@
         <p class="help">Fill the form so the bot can recognize your company and contact details, then open the bot on WhatsApp to start the 24-hour demo.</p>
 
         <form id="rg-form" novalidate autocomplete="off">
-          <!-- honeypot -->
+          <!-- Honeypot -->
           <input type="text" name="website" autocomplete="off" style="position:absolute;left:-9999px;top:-9999px" tabindex="-1" aria-hidden="true">
 
           <label for="company">Company *</label>
@@ -231,19 +249,19 @@
   </footer>
 
   <script>
-    // ===== CONFIG (matches your old backend) =====
+    /* ===== CONFIG (matches your old backend) ===== */
     const REGISTER_URL = "https://dmitreyvladimirovic.app.n8n.cloud/webhook/rg/register"; // x-www-form-urlencoded
     const WA_LINK = "https://wa.me/14155238886?text=join%20south-public"; // activation phrase
 
-    // ===== Analytics helper (works even without GA) =====
+    /* ===== Lightweight analytics ===== */
     window.dataLayer = window.dataLayer || [];
     function track(event, params = {}) {
       if (window.gtag) gtag('event', event, params);
       window.dataLayer.push({ event, ...params });
-      console.log('[track]', event, params);
+      // console.log('[track]', event, params);
     }
 
-    // ===== QR + link =====
+    /* ===== QR + link ===== */
     document.addEventListener('DOMContentLoaded', function(){
       const qrImg = document.getElementById('qr');
       const waA = document.getElementById('waLink');
@@ -258,7 +276,7 @@
       if (a && a.id === 'waLink') track('whatsapp_click', { href: a.href });
     });
 
-    // ===== Form handling (x-www-form-urlencoded + same field names) =====
+    /* ===== Form handling (x-www-form-urlencoded + same field names) ===== */
     const form = document.getElementById('rg-form');
     const btn  = document.getElementById('submitBtn');
     const statusEl = document.getElementById('status');
