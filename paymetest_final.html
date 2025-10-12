@@ -6,24 +6,24 @@
 
   <!-- Title & meta -->
   <title>Reconciliation Guardian — PayMe Demo</title>
-  <meta name="description" content="Prevent shipping unpaid orders. WhatsApp bot cross-checks PayMe vs platform in real time. Register, join WhatsApp, and get instant mismatch alerts.">
+  <meta name="description" content="Prevent shipping unpaid orders. WhatsApp bot cross-checks PayMe vs platform in real time. Register, open WhatsApp, and get instant mismatch alerts.">
 
-  <!-- Favicon / icons (put your logo file in repo root as payme-logo.png) -->
-  <link rel="icon" href="./payme-logo.png" sizes="32x32" type="image/png">
-  <link rel="apple-touch-icon" href="./payme-logo.png">
+  <!-- Favicon (quick JPEG variant from repo root) -->
+  <link rel="icon" href="./PayMe.jpeg" type="image/jpeg">
+  <link rel="shortcut icon" href="./PayMe.jpeg" type="image/jpeg">
+  <link rel="apple-touch-icon" href="./PayMe.jpeg">
+  <meta name="theme-color" content="#0f172a">
 
-  <!-- Open Graph -->
+  <!-- Open Graph / Twitter previews -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="Reconciliation Guardian — PayMe Demo">
-  <meta property="og:description" content="Real-time WhatsApp alerts when PayMe and your platform disagree. Register, join WhatsApp sandbox, and see it in action.">
-  <meta property="og:image" content="https://dmitreyvladimirov.github.io/DimitryPayMeTest/payme-logo.png">
+  <meta property="og:description" content="Real-time WhatsApp alerts when PayMe and your platform disagree. Register, join WhatsApp, and see it in action.">
+  <meta property="og:image" content="https://dmitreyvladimirov.github.io/DimitryPayMeTest/PayMe.jpeg">
   <meta property="og:url" content="https://dmitreyvladimirov.github.io/DimitryPayMeTest/paymetest_final.html">
-
-  <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Reconciliation Guardian — PayMe Demo">
   <meta name="twitter:description" content="WhatsApp bot that stops unpaid shipments with instant reconciliation alerts.">
-  <meta name="twitter:image" content="https://dmitreyvladimirov.github.io/DimitryPayMeTest/payme-logo.png">
+  <meta name="twitter:image" content="https://dmitreyvladimirov.github.io/DimitryPayMeTest/PayMe.jpeg">
 
   <style>
     :root{
@@ -34,7 +34,7 @@
     html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
     a{color:var(--brand-2);text-decoration:none} a:hover{text-decoration:underline}
     .container{max-width:1000px;margin:0 auto;padding:24px}
-    .banner{background:linear-gradient(90deg,#0ea5e9, #22d3ee);color:#003044;text-align:center;padding:10px 14px;font-weight:700}
+    .banner{background:linear-gradient(90deg,#0ea5e9,#22d3ee);color:#003044;text-align:center;padding:10px 14px;font-weight:700}
     .strip{background:#0b1224;border-bottom:1px solid #1f2a44}
     .strip .container{display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center;font-size:14px;color:var(--muted)}
     .strip strong{color:#c7d2fe}
@@ -74,6 +74,10 @@
     .toast.err{border-left-color:var(--err)}
     .small{font-size:12px}
     .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;color:#cbd5e1;background:#0b1224;border:1px solid #1f2a44;padding:2px 6px;border-radius:6px}
+
+    /* validation UI */
+    .field-error{color:#ef4444;font-size:12px;margin-top:6px}
+    input.input-error{border-color:#ef4444 !important; box-shadow:0 0 0 3px rgba(239,68,68,.2) !important}
     .inline-steps{display:flex;gap:12px;flex-wrap:wrap}
   </style>
 </head>
@@ -188,6 +192,7 @@
             <div>
               <label for="whatsapp">WhatsApp *</label>
               <input id="whatsapp" name="whatsapp" placeholder="+972 50 000 0000" required>
+              <div id="err-whatsapp" class="field-error"></div>
             </div>
           </div>
 
@@ -236,14 +241,13 @@
     </div>
   </footer>
 
-  <!-- Toast -->
+  <!-- Toast (reserved for future use) -->
   <div id="toast" class="toast"><div id="toastText">Saved.</div></div>
 
   <script>
-    // ===== CONFIG (matching your old backend) =====
-    const N8N_BASE = "https://dmitreyvladimirovic.app.n8n.cloud";        // same as old page
-    const REGISTER_URL = N8N_BASE + "/webhook/rg/register";              // x-www-form-urlencoded
-    const WA_LINK = "https://wa.me/14155238886?text=join%20south-public"; // same activation phrase as old page
+    // ===== CONFIG (matches your old backend) =====
+    const REGISTER_URL = "https://dmitreyvladimirovic.app.n8n.cloud/webhook/rg/register"; // x-www-form-urlencoded
+    const WA_LINK = "https://wa.me/14155238886?text=join%20south-public"; // activation phrase
 
     // ===== Analytics helper (works even without GA) =====
     window.dataLayer = window.dataLayer || [];
@@ -253,17 +257,16 @@
       console.log('[track]', event, params);
     }
 
-    // QR rendered
+    // ===== QR + link =====
     document.addEventListener('DOMContentLoaded', function(){
       const qrImg = document.getElementById('qr');
       const waA = document.getElementById('waLink');
       waA.href = WA_LINK;
-      // simple QR via external generator (same approach as old page)
       qrImg.src = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + encodeURIComponent(WA_LINK);
       track('qr_rendered', { page: 'paymetest_final' });
     });
 
-    // WhatsApp click
+    // WhatsApp click tracking
     document.addEventListener('click', function(e){
       const a = e.target.closest('a');
       if (a && a.id === 'waLink') track('whatsapp_click', { href: a.href });
@@ -273,12 +276,21 @@
     const form = document.getElementById('rg-form');
     const btn  = document.getElementById('submitBtn');
     const statusEl = document.getElementById('status');
+    const waErrEl = document.getElementById('err-whatsapp');
+    const waInput = document.getElementById('whatsapp');
 
     function validEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||'').trim()); }
+    function normalizePhone(v){ return String(v||'').replace(/[\s-]+/g,''); }
+    function validILPhone(v){
+      const p = normalizePhone(v);
+      return (/^\+9725\d{8}$/).test(p) || (/^05\d{8}$/).test(p);
+    }
 
     form.addEventListener('submit', async (e)=>{
       e.preventDefault();
       statusEl.textContent = '';
+      waErrEl.textContent = '';
+      waInput.classList.remove('input-error');
 
       const formData = new FormData(form);
       // honeypot
@@ -289,11 +301,24 @@
       const email    = (formData.get('email')    || '').trim();
       const whatsapp = (formData.get('whatsapp') || '').trim();
 
-      if (!company || !name || !email || !whatsapp){ statusEl.textContent = 'Please complete all required fields.'; return; }
-      if (!validEmail(email)){ statusEl.textContent = 'Please enter a valid email.'; return; }
+      if (!company || !name || !email || !whatsapp){
+        statusEl.textContent = 'Please complete all required fields.';
+        return;
+      }
+      if (!validEmail(email)){
+        statusEl.textContent = 'Please enter a valid email.';
+        return;
+      }
+      if (!validILPhone(whatsapp)){
+        waErrEl.textContent = 'Use +9725XXXXXXXX or 05XXXXXXXX (spaces/dashes allowed).';
+        waInput.classList.add('input-error');
+        statusEl.textContent = 'Please correct the WhatsApp number.';
+        return;
+      }
 
-      // Build x-www-form-urlencoded body (exactly like old page)
-      const body = new URLSearchParams({ company, name, email, whatsapp }).toString();
+      const body = new URLSearchParams({
+        company, name, email, whatsapp: normalizePhone(whatsapp)
+      }).toString();
 
       btn.disabled = true; btn.textContent = 'Submitting…';
 
@@ -310,7 +335,6 @@
           statusEl.textContent = 'You’re registered. Open the WhatsApp bot to start the 24h demo.';
           track('form_submit', { form: 'rg_register', status: 'ok' });
           btn.textContent = 'Registered ✓';
-          // Scroll to QR
           document.getElementById('waLink').scrollIntoView({ behavior:'smooth' });
         } else {
           statusEl.textContent = 'Registration error: ' + (j.error || res.status);
