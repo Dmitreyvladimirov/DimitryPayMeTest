@@ -192,9 +192,11 @@
             </div>
             <div>
               <label for="localPhone">WhatsApp (local format) *</label>
-              <!-- User enters NSN without trunk; placeholder updates per country -->
+              <!-- User enters NSN without trunk; placeholder and hint update per country -->
               <input id="localPhone" name="localPhone" inputmode="tel" placeholder="For IL: 5XXXXXXXX" required>
               <div id="err-whatsapp" class="field-error"></div>
+              <!-- NEW: always-visible inline hint -->
+              <div id="phoneHint" class="help"></div>
             </div>
           </div>
 
@@ -250,7 +252,6 @@
     function track(event, params = {}) {
       if (window.gtag) gtag('event', event, params);
       window.dataLayer.push({ event, ...params });
-      // console.log('[track]', event, params); // keep quiet in production
     }
 
     /* ------------------- Country rules -------------------
@@ -279,6 +280,7 @@
     const localPhone = document.getElementById('localPhone');
     const hiddenWA   = document.getElementById('whatsapp');
     const waErrEl    = document.getElementById('err-whatsapp');
+    const phoneHint  = document.getElementById('phoneHint'); // NEW: inline format hint
 
     /* ------------------- Helpers ------------------- */
     function digitsOnly(s){ return String(s||'').replace(/\D/g,''); }
@@ -291,22 +293,26 @@
       localPhone.classList.add('input-error');
     }
 
-    /* Update placeholder and maxlength when country changes */
+    /* Update placeholder, maxlength and inline hint when country changes */
     function setLocalConstraints(){
       const cc  = countrySel.value;
       const cfg = COUNTRIES[cc] || {};
       const sampleDigits = digitsOnly(cfg.sample || '');
       const baseLen = sampleDigits.length || (cfg.nsn?.[1] || 15);
 
-      // Placeholder shows the correct local sample for the selected country
+      // Placeholder & maxlength (+1 allows accidental trunk; we'll strip it)
       localPhone.placeholder = cfg.sample ? `For ${cc}: ${cfg.sample}` : 'Local number';
-      // Allow one extra char for accidental trunk; we will strip it later
       localPhone.maxLength   = baseLen + (cfg.trunk ? 1 : 0);
+
+      // Inline hint (always visible, not an error)
+      phoneHint.textContent = cfg.sample
+        ? `Format: ${cfg.sample}${cfg.hint ? ` — ${cfg.hint}` : ''}`
+        : (cfg.hint || '');
 
       clearPhoneError();
     }
 
-    // Some browsers miss "change" occasionally; attach multiple triggers
+    // Some browsers miss "change"; attach multiple triggers to be safe
     countrySel.addEventListener('change', setLocalConstraints);
     countrySel.addEventListener('click',  setLocalConstraints);
     countrySel.addEventListener('focus',  setLocalConstraints);
@@ -359,8 +365,7 @@
       qrImg.src   = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + encodeURIComponent(WA_LINK);
       track('qr_rendered', { page: 'paymetest_final' });
       setLocalConstraints();
-      // Ensure placeholder is correct after painting
-      setTimeout(setLocalConstraints, 0);
+      setTimeout(setLocalConstraints, 0); // ensure hint/placeholder after first paint
     });
 
     // Track outbound click
